@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36310.24 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATMScoreBoard.Shared", "ATMScoreBoard.Shared\ATMScoreBoard.Shared.csproj", "{314A2D7D-13A4-4C15-82ED-BF412063F908}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATMScoreBoard.Web", "ATMScoreBoard.Web\ATMScoreBoard.Web.csproj", "{902EAF19-71B9-4ECD-BA8F-DE845E2ED52C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATMScoreBoard.Display", "ATMScoreBoard.Display\ATMScoreBoard.Display.csproj", "{F019602D-3E6B-42B8-96D5-16E173732793}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{314A2D7D-13A4-4C15-82ED-BF412063F908}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{314A2D7D-13A4-4C15-82ED-BF412063F908}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{314A2D7D-13A4-4C15-82ED-BF412063F908}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{314A2D7D-13A4-4C15-82ED-BF412063F908}.Release|Any CPU.Build.0 = Release|Any CPU
+		{902EAF19-71B9-4ECD-BA8F-DE845E2ED52C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{902EAF19-71B9-4ECD-BA8F-DE845E2ED52C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{902EAF19-71B9-4ECD-BA8F-DE845E2ED52C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{902EAF19-71B9-4ECD-BA8F-DE845E2ED52C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F019602D-3E6B-42B8-96D5-16E173732793}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F019602D-3E6B-42B8-96D5-16E173732793}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F019602D-3E6B-42B8-96D5-16E173732793}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F019602D-3E6B-42B8-96D5-16E173732793}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A222EB0C-B40D-4963-BF2C-DD90C03974B6}
+	EndGlobalSection
+EndGlobal
