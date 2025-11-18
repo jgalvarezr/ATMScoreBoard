@@ -1,0 +1,93 @@
+﻿.card {
+    border-color: #313539;
+    background-color: #262A2E;
+    color: #e1e5e9;
+    padding: 0px;
+    margin-bottom: 10px;
+}
+
+.card-header {
+    background-color: #363A3E;
+    padding: 5px 0 5px 10px;
+    color: var(--bs-warning);
+}
+
+
+/* --- ESTILOS PARA SELECCIÓN DE MODALIDAD (VERTICAL) --- */
+.modality-selector .modality-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    border-width: 1px;
+    border-color: #414549;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+    /* No necesitamos flex-direction ni align-items porque el contenido ya está centrado por defecto */
+}
+
+    .modality-selector .modality-btn img {
+        width: 80%; /* La imagen ocupará todo el ancho del botón */        
+        object-fit: contain; /* Asegura que la imagen no se deforme */        
+    }
+
+    .modality-selector .modality-btn span {
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+/* Los estilos para :checked y :hover se mantienen igual, no necesitan cambios */
+.modality-selector .btn-check:checked + .modality-btn {
+    border-color: #848a90;
+    box-shadow: 0 0 15px rgba(128, 130, 150, 0.7);
+    background-color: #646a70;
+    transform: scale(1.0); /* Reducimos un poco el efecto de escala para vertical */
+}
+
+/*.modality-selector .modality-btn:hover {
+    transform: scale(1.0);
+    background-color: #343a40;
+}*/
+
+/* --- FIN ESTILOS PARA SELECCIÓN DE MODALIDAD --- */
+
+
+/* --- ESTILOS PARA SELECCIÓN DE JUEGO --- */
+.game-type-selector .game-type-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-width: 1px;
+    border-color: #414549;
+    transition: all 0.2s ease-in-out;
+    height: 100%;
+}
+
+    .game-type-selector .game-type-btn img {
+        width: 80%;
+        aspect-ratio: 1 / 1;
+        object-fit: contain;
+        margin-bottom: 0.5rem;
+    }
+
+    .game-type-selector .game-type-btn span {
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+/* Estilo para el botón seleccionado */
+.game-type-selector .btn-check:checked + .game-type-btn {
+    border-color: #848a90; /* Color primario de Bootstrap */
+    box-shadow: 0 0 15px rgba(128, 130, 150, 0.7);
+    background-color: #646a70;
+    transform: scale(1.0);
+}
+
+/* Efecto al pasar el ratón por encima */
+/*.game-type-selector .game-type-btn:hover {
+    transform: scale(1.0);
+    background-color: #343a40;
+}*/
+/* --- FIN ESTILOS PARA SELECCIÓN DE JUEGO --- */

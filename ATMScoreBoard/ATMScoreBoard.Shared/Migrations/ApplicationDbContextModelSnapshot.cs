@@ -158,6 +158,10 @@ namespace ATMScoreBoard.Shared.Migrations
 
                     b.HasKey("MesaId");
 
+                    b.HasIndex("EquipoAId");
+
+                    b.HasIndex("EquipoBId");
+
                     b.ToTable("PartidasActuales");
                 });
 
@@ -169,7 +173,7 @@ namespace ATMScoreBoard.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("JugadorId")
+                    b.Property<int>("EquipoId")
                         .HasColumnType("int");
 
                     b.Property<int>("MesaId")
@@ -184,24 +188,6 @@ namespace ATMScoreBoard.Shared.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PartidasActualesBolas");
-                });
-
-            modelBuilder.Entity("ATMScoreBoard.Shared.Models.TipoJuego", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TiposJuego");
                 });
 
             modelBuilder.Entity("ATMScoreBoard.Shared.Models.EquipoJugador", b =>
@@ -221,6 +207,25 @@ namespace ATMScoreBoard.Shared.Migrations
                     b.Navigation("Equipo");
 
                     b.Navigation("Jugador");
+                });
+
+            modelBuilder.Entity("ATMScoreBoard.Shared.Models.PartidaActual", b =>
+                {
+                    b.HasOne("ATMScoreBoard.Shared.Models.Equipo", "EquipoA")
+                        .WithMany()
+                        .HasForeignKey("EquipoAId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ATMScoreBoard.Shared.Models.Equipo", "EquipoB")
+                        .WithMany()
+                        .HasForeignKey("EquipoBId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EquipoA");
+
+                    b.Navigation("EquipoB");
                 });
 
             modelBuilder.Entity("ATMScoreBoard.Shared.Models.Equipo", b =>

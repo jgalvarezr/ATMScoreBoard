@@ -1,0 +1,20 @@
+﻿@keyframes pulse-red {
+    0% {
+        background-color: var(--bs-dark-bg-subtle); /* Color de fondo inicial (un gris oscuro de Bootstrap) */
+        box-shadow: none; /* Sin sombra al inicio */
+    }
+
+    50% {
+        background-color: var(--bs-danger); /* Color rojo de Bootstrap en el pico de la animación */
+        box-shadow: 0 0 20px var(--bs-danger); /* Añade un brillo rojo para más impacto */
+    }
+
+    100% {
+        background-color: var(--bs-dark-bg-subtle); /* Vuelve al color de fondo inicial */
+        box-shadow: none; /* Sin sombra al final */
+    }
+}
+
+.highlight-winner {
+    animation: pulse-red 2s ease-in-out infinite;
+}

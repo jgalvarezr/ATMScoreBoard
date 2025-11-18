@@ -1,0 +1,96 @@
+﻿@page "/editarjugador"
+@page "/editarjugador/{Id:int}"
+
+@using ATMScoreBoard.Shared
+@using ATMScoreBoard.Shared.Models
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>@(IsNew ? "Nuevo Jugador" : "Editar Jugador")</PageTitle>
+
+<h3 class="mt-3">@(IsNew ? "Nuevo Jugador" : "Editar Jugador")</h3>
+<hr />
+
+@if (jugador == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <EditForm Model="@jugador" OnValidSubmit="GuardarJugador">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre del Jugador</label>
+            <InputText id="nombre" class="form-control" @bind-Value="jugador.Nombre" />
+        </div>
+
+        <div class="d-flex justify-content-end gap-3">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Guardar</button>
+            <button type="button" class="btn btn-secondary" @onclick="Cancelar"><i class="bi bi-x-circle"></i> Cancelar</button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Jugador? jugador;
+    private bool IsNew => Id == 0;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsNew)
+        {
+            jugador = new Jugador();
+        }
+        else
+        {
+            jugador = await DbContext.Jugadores.FindAsync(Id);
+        }
+    }
+
+    private async Task GuardarJugador()
+    {
+        try
+        {
+            // Verificamos si el nombre ya existe (lógica de unicidad)
+            var nombreNormalizado = jugador?.Nombre?.Trim().ToLower() ?? string.Empty;
+            var existe = await DbContext.Jugadores.AnyAsync(j => j.Nombre.ToLower() == nombreNormalizado && j.Id != jugador!.Id);
+
+            if (existe)
+            {
+                await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", "Este nombre de jugador ya está en uso.", "error");
+                return;
+            }
+
+            if (IsNew)
+            {
+                DbContext.Jugadores.Add(jugador!);
+            }
+            else
+            {
+                DbContext.Jugadores.Update(jugador!);
+            }
+
+            await DbContext.SaveChangesAsync();
+            Navigation.NavigateTo("/gestionjugadores");
+        }
+        catch (Exception ex)
+        {
+            // Manejar otros posibles errores de guardado
+            errorMessage = $"Error al guardar: {ex.Message}";
+        }
+    }
+
+    private void Cancelar()
+    {
+        // Usamos el servicio de navegación para volver a la lista
+        Navigation.NavigateTo("/gestionjugadores");
+    }
+}

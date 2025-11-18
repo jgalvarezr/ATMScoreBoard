@@ -1,0 +1,251 @@
+﻿@page "/setuppartida"
+@using ATMScoreBoard.Shared
+@using ATMScoreBoard.Shared.Models
+@using ATMScoreBoard.Web.DTOs
+@using ATMScoreBoard.Web.Services
+@using Microsoft.EntityFrameworkCore
+@using System.Net.Http.Json
+
+@inject ApplicationDbContext DbContext
+@inject NavigationManager Navigation
+@inject PartidaService PartidaService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Configurar Nueva Partida</PageTitle>
+
+
+
+@if (jugadoresDisponibles == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <EditForm Model="@partidaSetup" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="row align-items-center mt-1 mb-3">
+            <div class="col">
+                <h2>Nueva Partida</h2>
+            </div>
+
+            <div class="col-auto mt-1">
+                <h3 class="text-white">Mesa Principal</h3>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/"))">
+                    <i class="bi bi-house-door-fill"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Fila para Modalidad y Tipo de Juego -->
+        <div class="row mb-4 align-items-stretch">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="card h-100">
+                    <div class="card-header">Modalidad</div>
+                    <div class="card-body d-flex justify-content-between align-items-center gap-2 modality-selector">
+                        <InputRadioGroup @bind-Value="partidaSetup.Modalidad" class="d-grid gap-2">
+                            <div class="form-check p-0">
+                                <label class="btn btn-outline-light modality-btn @(partidaSetup.Modalidad == Modalidad.Individual? "active" : "")">
+                                    <InputRadio Value="Modalidad.Individual" class="btn-check" />
+                                    <img src="/images/players01.png" alt="Individual" /><span>Individual</span>
+                                </label>
+                            </div>
+                            <div class="form-check p-0">
+                                <label class="btn btn-outline-light modality-btn @(partidaSetup.Modalidad == Modalidad.Parejas ? "active" : "")">
+                                    <InputRadio Value="Modalidad.Parejas" class="btn-check " />
+                                    <img src="/images/players02.png" alt="Parejas" /><span>Parejas</span>
+                                </label>
+                            </div>
+                        </InputRadioGroup>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">Tipo de Juego</div>
+                    <div class="card-body d-flex justify-content-between gap-2 game-type-selector">
+                        <InputRadioGroup @bind-Value="partidaSetup.TipoJuego">
+                            <!-- Aquí irían los 4 botones de tipo de juego -->
+                            <div class="form-check p-0 h-100">
+                                <label class="btn btn-outline-light game-type-btn @(partidaSetup.TipoJuego == TipoJuego.Bola8? "active" : "")">
+                                    <InputRadio Value="TipoJuego.Bola8" class="btn-check" />
+                                    <img src="/images/bola-08.png" alt="Bola 8" /><span>Bola 8</span>
+                                </label>
+                            </div>
+                            <div class="form-check p-0 h-100">
+                                <label class="btn btn-outline-light game-type-btn @(partidaSetup.TipoJuego == TipoJuego.Bola9? "active" : "")">
+                                    <InputRadio Value="TipoJuego.Bola9" class="btn-check" />
+                                    <img src="/images/bola-09.png" alt="Bola 9" /><span>Bola 9</span>
+                                </label>
+                            </div>
+                            <div class="form-check p-0 h-100">
+                                <label class="btn btn-outline-light game-type-btn @(partidaSetup.TipoJuego == TipoJuego.Bola10? "active" : "")">
+                                    <InputRadio Value="TipoJuego.Bola10" class="btn-check" />
+                                    <img src="/images/bola-10.png" alt="Bola 10" /><span>Bola 10</span>
+                                </label>
+                            </div>
+                            <div class="form-check p-0 h-100">
+                                <label class="btn btn-outline-light game-type-btn @(partidaSetup.TipoJuego == TipoJuego.Chapolin? "active" : "")">
+                                    <InputRadio Value="TipoJuego.Chapolin" class="btn-check" />
+                                    <img src="/images/bola-ch.png" alt="Chapolin" /><span>Chapolín</span>
+                                </label>
+                            </div>
+                        </InputRadioGroup>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila para la Selección de Jugadores -->
+        <div class="row">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="card h-100">
+                    <div class="card-header">Equipo A</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="jugadorA1" class="form-label">Jugador(es)</label>
+                            <InputSelect id="jugadorA1" class="form-select bg-dark text-white" @bind-Value="partidaSetup.JugadorA1Id">
+                                <option value="0">Seleccionar...</option>
+                                @foreach (var j in jugadoresDisponibles)
+                                {
+                                    <option value="@j.Id">@j.Nombre</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        @if (partidaSetup.Modalidad == Modalidad.Parejas)
+                        {
+                            <div class="mb-2">
+                                <InputSelect id="jugadorA2" class="form-select bg-dark text-white" @bind-Value="partidaSetup.JugadorA2Id">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach (var j in jugadoresDisponibles)
+                                    {
+                                        <option value="@j.Id">@j.Nombre</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <!-- Card para Equipo B (similar al Equipo A) -->
+                <div class="card h-100 ">
+                    <div class="card-header">Equipo B</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="jugadorB1" class="form-label">Jugador(es)</label>
+                            <InputSelect id="jugadorB1" class="form-select bg-dark text-white" @bind-Value="partidaSetup.JugadorB1Id">
+                                <option value="0">Seleccionar...</option>
+                                @foreach (var j in jugadoresDisponibles)
+                                {
+                                    <option value="@j.Id">@j.Nombre</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        @if (partidaSetup.Modalidad == Modalidad.Parejas)
+                        {
+                            <div class="mb-2">
+                                <InputSelect id="jugadorB2" class="form-select bg-dark text-white" @bind-Value="partidaSetup.JugadorB2Id">
+                                    <option value="">Seleccionar...</option>
+                                    @foreach (var j in jugadoresDisponibles)
+                                    {
+                                        <option value="@j.Id">@j.Nombre</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-2 text-end">
+            <button type="submit" class="btn btn-success btn-lg">Iniciar Partida</button>
+        </div>
+
+
+
+    </EditForm>
+}
+
+@code {
+    private List<Jugador>? jugadoresDisponibles;
+    private SetupPartidaModel partidaSetup = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        jugadoresDisponibles = await DbContext.Jugadores
+            .Where(j => j.IsActive)
+            .OrderBy(j => j.Nombre)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // 1. Validaciones personalizadas que Blazor no puede hacer automáticamente
+        var jugadoresSeleccionados = new List<int?>();
+        jugadoresSeleccionados.Add(partidaSetup.JugadorA1Id);
+        jugadoresSeleccionados.Add(partidaSetup.JugadorB1Id);
+        if (partidaSetup.Modalidad == Modalidad.Parejas)
+        {
+            if (partidaSetup.JugadorA2Id == null || partidaSetup.JugadorB2Id == null)
+            {
+                await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", "Debe seleccionar el segundo jugador de cada equipo en modo parejas.", "error");
+                return;
+            }
+            jugadoresSeleccionados.Add(partidaSetup.JugadorA2Id);
+            jugadoresSeleccionados.Add(partidaSetup.JugadorB2Id);            
+        }
+        // Comprobar si algún selector está en "Seleccionar..."
+        if (jugadoresSeleccionados.Any(id => id == 0 || id == null))
+        {
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", "Debes seleccionar todos los jugadores requeridos.", "error");
+            return;
+        }
+
+        // Comprobar si hay jugadores duplicados
+        var idsSinNulos = jugadoresSeleccionados.Where(id => id.HasValue).Select(id => id.Value).ToList();
+        if (idsSinNulos.Count != idsSinNulos.Distinct().Count())
+        {
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", "No puedes seleccionar al mismo jugador varias veces.", "error");
+            return;
+        }
+
+        // 2. Construir el DTO para la API
+        var dto = new IniciarPartidaDto
+        {
+            MesaId = partidaSetup.MesaId,
+            TipoJuegoId = (int)partidaSetup.TipoJuego,
+            JugadorIds = idsSinNulos
+        };
+
+        // 3. Enviar los datos a la API
+        try
+        {
+            var partidaCreada = await PartidaService.IniciarPartidaAsync(dto);
+
+                // Usamos Swal.fire para una notificación de éxito con redirección
+                await JSRuntime.InvokeVoidAsync("Swal.fire", new
+                {
+                    title = "¡Éxito!",
+                    text = "La partida ha sido iniciada correctamente.",
+                    icon = "success",
+                    timer = 2000,
+                    showConfirmButton = false
+                });
+
+                // Redirigimos a la página del juego (que crearemos en el futuro)
+                // Usamos un pequeño delay para que el usuario vea la notificación
+                await Task.Delay(2000);
+                Navigation.NavigateTo($"/juego/{partidaCreada.MesaId}");
+            
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Error de conexión", ex.Message, "error");
+        }
+    }
+}

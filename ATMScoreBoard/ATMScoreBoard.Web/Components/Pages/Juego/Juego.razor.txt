@@ -1,0 +1,177 @@
+﻿@page "/juego/{MesaId:int}"
+@using ATMScoreBoard.Shared
+@using ATMScoreBoard.Shared.Models
+@using Microsoft.EntityFrameworkCore
+@using ATMScoreBoard.Web.Components.Pages.Juego
+
+@inject ApplicationDbContext DbContext
+@inject NavigationManager Navigation
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+
+
+<PageTitle>Partida - Mesa @MesaId</PageTitle>
+
+@if (isLoading)
+{
+    <p><em>Cargando partida...</em></p>
+}
+else if (partidaActual == null || errorMessage != null)
+{
+    <div class="alert alert-danger">
+        <h4 class="alert-heading">Error al Cargar la Partida</h4>
+        <p>@errorMessage</p>
+        <hr>
+        <button class="btn btn-primary" @onclick='() => Navigation.NavigateTo("/")'>Volver al Dashboard</button>
+    </div>
+}
+else
+{
+    <!-- Este es el contenedor principal del juego -->
+    <!-- Pasamos 'partidaActual' a todos los componentes hijos usando CascadingValue -->
+    <CascadingValue Value="partidaActual">
+
+        <_EncabezadoMarcador nombreEquipoA="@GetNombresFromNavigation(partidaActual.EquipoA)"
+                             nombreEquipoB="@GetNombresFromNavigation(partidaActual.EquipoB)"
+                             tipoJuegoNombre="@(((TipoJuego)partidaActual.TipoJuegoId).ToString())"
+                             puntuacionA="puntuacionA"
+                             puntuacionB="puntuacionB"
+                             bolasA="bolasA"
+                             bolasB="bolasB" />
+
+        <hr class="my-1" />
+
+        <!-- 2. BODY (Switch para la modalidad de juego) -->
+        @switch ((TipoJuego)partidaActual.TipoJuegoId)
+        {
+            case TipoJuego.Chapolin:
+                <!-- <JuegoChapolin /> -->
+                <_JuegoChapolin OnEstadoJuegoCambiado="EstadoCambiado"
+                                bolasA="bolasA"
+                                bolasB="bolasB" />
+                break;
+            case TipoJuego.Bola8:
+                <!-- <JuegoBola8 /> -->
+                <p>Aquí irá el componente para jugar Bola 8.</p>
+                break;
+            default:
+                <div class="alert alert-warning">Esta modalidad de juego aún no está implementada.</div>
+                break;
+        }
+
+        <hr class="my-4" />
+
+        <!-- 3. FOOTER (futuro componente _AccionesPartida) -->
+        <div>
+            <p>Aquí irán las acciones como Finalizar Partida.</p>
+        </div>
+
+    </CascadingValue>
+}
+
+@code {
+    [Parameter]
+    public int MesaId { get; set; }
+
+    private PartidaActual? partidaActual;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    private int puntuacionA = 0;
+    private int puntuacionB = 0;
+    private List<int> bolasA = new();
+    private List<int> bolasB = new();
+    public string nombreEquipoA { get; set; } = "";
+    public string nombreEquipoB { get; set; } = "";    
+    public string tipoJuegoNombre { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Cargamos la partida actual y la información de los equipos
+            partidaActual = await DbContext.PartidasActuales
+                .Include(p => p.EquipoA)
+                .ThenInclude(e => e.EquipoJugadores)
+                .ThenInclude(ej => ej.Jugador)
+                .Include(p => p.EquipoB)
+                .ThenInclude(e => e.EquipoJugadores)
+                .ThenInclude(ej => ej.Jugador)
+                .FirstOrDefaultAsync(p => p.MesaId == MesaId);
+
+
+            if (partidaActual != null)
+            {   
+                nombreEquipoA = GetNombresFromNavigation(partidaActual.EquipoA);
+                nombreEquipoB = GetNombresFromNavigation(partidaActual.EquipoB);
+                tipoJuegoNombre = ((TipoJuego)partidaActual.TipoJuegoId).ToString();
+
+                await CargarEstadoJuego();
+                
+            }
+            else
+            {
+                errorMessage = $"No se encontró una partida en curso para la mesa {MesaId}.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar la partida: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task EstadoCambiado()
+    {
+        await CargarEstadoJuego();
+        StateHasChanged();
+    }
+
+    private async Task CargarEstadoJuego()
+    {
+        if (partidaActual == null) return;
+
+        using var context = DbContextFactory.CreateDbContext();
+
+        var bolasGuardadas = await context.PartidasActualesBolas
+                                        .Where(b => b.MesaId == partidaActual.MesaId)
+                                        .OrderBy(b => b.Timestamp)
+                                        .ToListAsync();
+
+        // Limpiamos el estado local antes de recalcular
+        puntuacionA = 0;
+        puntuacionB = 0;
+        bolasA.Clear();
+        bolasB.Clear();
+
+        foreach (var bola in bolasGuardadas)
+        {
+            // Ya que tenemos las propiedades de navegación, podemos simplificar esta lógica
+            var equipoDelJugador = partidaActual.EquipoA.EquipoJugadores.Any(ej => ej.JugadorId == bola.EquipoId)
+                ? partidaActual.EquipoA
+                : partidaActual.EquipoB;
+
+            int puntos = bola.NumeroBola == 0 ? 10 : bola.NumeroBola;
+
+            if (equipoDelJugador.Id == partidaActual.EquipoAId)
+            {
+                puntuacionA += puntos;
+                bolasA.Add(bola.NumeroBola);
+            }
+            else if (equipoDelJugador.Id == partidaActual.EquipoBId)
+            {
+                puntuacionB += puntos;
+                bolasB.Add(bola.NumeroBola);
+            }
+        }
+    }
+
+    private string GetNombresFromNavigation(Equipo equipo)
+    {
+        // Usamos las propiedades de navegación que ya cargamos en el componente padre
+        var nombres = equipo.EquipoJugadores.Select(ej => ej.Jugador.Nombre).ToList();
+        return string.Join("<br />", nombres);
+    }
+}

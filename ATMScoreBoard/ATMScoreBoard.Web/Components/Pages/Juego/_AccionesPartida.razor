@@ -1,0 +1,173 @@
+﻿@using ATMScoreBoard.Shared.Models
+@using ATMScoreBoard.Web.DTOs
+@using ATMScoreBoard.Web.Services
+@using System.Text.Json
+
+@inject PartidaService PartidaService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+
+<div class="row mt-4">
+    <div class="col-12 text-center d-flex justify-content-center gap-3">
+        <!-- Botón Corregir (aún sin funcionalidad) -->
+        <button class="btn @(modoCorreccionLocal ? "btn-danger" : "btn-warning") btn-lg" @onclick="ActivarModoCorreccion">
+            <i class="bi bi-eraser-fill me-2"></i> Corregir
+        </button>
+
+        <!-- Botón Finalizar -->
+        <button class="btn btn-danger btn-lg" @onclick="FinalizarPartida">
+            <i class="bi bi-flag-fill me-2"></i> Finalizar Partida
+        </button>
+
+        <a href="/" class="btn btn-secondary btn-lg"><i class="bi bi-house-door-fill"></i></a>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public PartidaActual? partidaActual { get; set; }
+
+    [Parameter] public int PuntuacionA { get; set; }
+    [Parameter] public int PuntuacionB { get; set; }
+    [Parameter] public EventCallback<bool> OnModoCorreccionChange { get; set; }
+    [Parameter] public ResultadoChequeo ResultadoJuego { get; set; } = new();
+
+    private bool modoCorreccionLocal = false;
+    private Timer? correccionTimer;
+
+
+    private async Task FinalizarPartida()
+    {
+        if (partidaActual == null) return;
+
+        if (ResultadoJuego.Estado == EstadoPartida.Ganada || ResultadoJuego.Estado == EstadoPartida.Zapatero)
+        {
+            // --- FLUJO NORMAL: Hay un ganador claro ---
+            var confirmado = await JSRuntime.InvokeAsync<bool>("Swal_confirm",
+                "Finalizar Partida",
+                "Se ha detectado un ganador. ¿Desea guardar el resultado y terminar la partida?",
+                "success",
+                "Sí, ¡finalizar!");
+
+            if (confirmado)
+            {
+                int? equipoGanadorId = ResultadoJuego.Ganador == EquipoIdentifier.EquipoA
+                    ? partidaActual.EquipoAId
+                    : (ResultadoJuego.Ganador == EquipoIdentifier.EquipoB ? partidaActual.EquipoBId : null);
+
+                await GuardarPartidaEnHistorico(equipoGanadorId, ResultadoJuego.Estado == EstadoPartida.Zapatero);
+            }
+        }
+
+        else
+        {
+            // --- FLUJO ESPECIAL: No hay ganador aún ---
+            var result = await JSRuntime.InvokeAsync<JsonElement>("Swal.fire", new
+            {
+                title = "Partida no finalizada",
+                html = "Según las reglas, aún no hay un ganador claro.<br>¿Qué desea hacer?",
+                icon = "question",
+                showDenyButton = true,
+                showCancelButton = true,
+                confirmButtonText = "Guardar (sin ganador)",
+                denyButtonText = "Descartar partida",
+                cancelButtonText = "Continuar jugando"
+            });
+
+            if (result.TryGetProperty("isConfirmed", out var isConfirmed) && isConfirmed.GetBoolean())
+            {
+                // Opción 1: Guardar sin ganador
+                await GuardarPartidaEnHistorico(null, false);
+            }
+            else if (result.TryGetProperty("isDenied", out var isDenied) && isDenied.GetBoolean())
+            {
+                // Opción 2: Descartar la partida
+                await CancelarPartidaActual();
+            }
+            // Opción 3 (isDismissed): No hacer nada
+        }
+    }
+
+    private async Task GuardarPartidaEnHistorico(int? equipoGanadorId, bool fueVictoriaImpecable)
+    {
+        if (partidaActual == null) return;
+        try
+        {
+            var dto = new FinalizarPartidaDto
+            {
+                MesaId = partidaActual.MesaId,
+                EquipoGanadorId = equipoGanadorId,
+                FueVictoriaImpecable = fueVictoriaImpecable
+            };
+
+            await PartidaService.FinalizarPartidaAsync(dto);
+
+            await JSRuntime.InvokeVoidAsync("Swal.fire", new
+            {
+                title = "Partida Finalizada",
+                text = "El resultado ha sido guardado.",
+                icon = "success",
+                timer = 2000,
+                showConfirmButton = false
+            });
+            await Task.Delay(2000);
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", ex.Message, "error");
+        }
+    }
+
+    private async Task CancelarPartidaActual()
+    {
+        if (partidaActual == null) return;
+        try
+        {
+            await PartidaService.CancelarPartidaAsync(partidaActual.MesaId);
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "info", "La partida ha sido descartada.");
+            await Task.Delay(1500);
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", ex.Message, "error");
+        }
+    }
+
+    private async Task ActivarModoCorreccion()
+    {
+        modoCorreccionLocal = !modoCorreccionLocal; // Alternamos el estado
+
+        // Notificamos al padre
+        await OnModoCorreccionChange.InvokeAsync(modoCorreccionLocal);
+
+        // Si activamos, iniciamos un temporizador para desactivarlo automáticamente
+        if (modoCorreccionLocal)
+        {
+            correccionTimer?.Dispose(); // Limpiamos cualquier temporizador anterior
+            correccionTimer = new Timer(DesactivarModoCorreccion, null, 5000, Timeout.Infinite); // 5 segundos
+        }
+    }
+
+    private void DesactivarModoCorreccion(object? state)
+    {
+        InvokeAsync(async () =>
+        {
+            if (modoCorreccionLocal)
+            {
+                modoCorreccionLocal = false;
+                await OnModoCorreccionChange.InvokeAsync(false);
+                StateHasChanged(); // Aseguramos que el botón vuelva a su estado normal
+            }
+            correccionTimer?.Dispose();
+        });
+    }
+
+    // Asegúrate de limpiar el temporizador cuando el componente se destruye
+    public void Dispose()
+    {
+        correccionTimer?.Dispose();
+    }
+
+}

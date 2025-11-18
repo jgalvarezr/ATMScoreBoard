@@ -1,0 +1,98 @@
+﻿@using ATMScoreBoard.Shared
+@using ATMScoreBoard.Shared.Models
+@using Microsoft.EntityFrameworkCore
+@using ATMScoreBoard.Web.Services
+
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+
+
+@if (isLoading)
+{
+    <p><em>Cargando marcador...</em></p>
+}
+else
+{
+    <div class="row my-2">
+        <div class="col-6">
+            <div class="d-flex justify-content-start flex-wrap gap-1 mb-0" style="min-height: 32px;">
+                @foreach (var bolaNum in bolasA.OrderBy(b => b))
+                {
+                    <img src="/images/bola-@(bolaNum.ToString("D2")).png" style="width: 30px; height: 30px;" alt="Bola @bolaNum" />
+                }
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="d-flex justify-content-end flex-wrap gap-1 mb-0" style="min-height: 32px;">
+                @foreach (var bolaNum in bolasB.OrderBy(b => b))
+                {
+                    <img src="/images/bola-@(bolaNum.ToString("D2")).png" style="width: 30px; height: 30px;" alt="Bola @bolaNum" />
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row text-center mb-3 mt-1">
+        <!-- Columna Equipo A -->
+        <div class="col-5">
+            <div class="row border border-1 rounded-2 border-secondary pt-2 @(Ganador == EquipoIdentifier.EquipoA ? "highlight-winner" : "")">
+                <div class="col-7 text-start">
+                    <div class="text-warning fs-4">
+                        @( (MarkupString)nombreEquipoA )
+                    </div>
+                </div>
+                <div class="col-5 text-center">
+                    <h2 class="display-3 fw-bold">@puntuacionA</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Central -->
+        <div class="col-2 d-flex flex-column align-items-center justify-content-center">
+            <h4>@tipoJuegoNombre</h4>
+            <span class="badge bg-secondary fs-4">vs</span>
+        </div>
+
+        <!-- Columna Equipo B -->
+        <div class="col-5">
+            <div class="row border border-1 rounded-2 border-secondary pt-2 @(Ganador == EquipoIdentifier.EquipoB ? "highlight-winner" : "")">
+                <div class="col-5 text-center">
+                    <h2 class="display-3 fw-bold">@puntuacionB</h2>
+                </div>
+                <div class="col-7 text-end">
+                    <div class="text-warning fs-4">
+                       @( (MarkupString)nombreEquipoB )
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    public PartidaActual? partidaActual { get; set; }
+
+    [Parameter] public EquipoIdentifier Ganador { get; set; } = EquipoIdentifier.Ninguno;
+
+    [Parameter] public string nombreEquipoA { get; set; } = "";
+    [Parameter] public string nombreEquipoB { get; set; } = "";
+    [Parameter] public int puntuacionA { get; set; }
+    [Parameter] public int puntuacionB { get; set; }
+    [Parameter] public List<int> bolasA { get; set; } = new();
+    [Parameter] public List<int> bolasB { get; set; } = new();
+    [Parameter] public string tipoJuegoNombre { get; set; } = "";
+
+    private bool isLoading = true;
+
+    // Propiedades para mostrar en la UI
+
+
+    protected override void OnParametersSet()
+    {
+        isLoading = false;
+    }
+
+    
+
+    
+}

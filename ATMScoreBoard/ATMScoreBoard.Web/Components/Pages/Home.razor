@@ -1,7 +1,128 @@
 ﻿@page "/"
+@using ATMScoreBoard.Shared
+@using ATMScoreBoard.Shared.Models
+@using ATMScoreBoard.Web.Services
+@using System.Net.Http.Json
 
-<PageTitle>Home</PageTitle>
+@inject ApplicationDbContext DbContext
+@inject IConfiguration Configuration
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@inject PartidaService PartidaService
 
-<h1>Hello, world!</h1>
+<PageTitle>Dashboard - ATMScoreBoard</PageTitle>
 
-Welcome to your new app.
+<div class="text-center">
+    <h1 class="display-4">ATMScoreBoard</h1>
+
+    @if (isLoading)
+    {
+        <p class="lead mb-5"><span class="spinner-border spinner-border-sm"></span> Consultando estado de la mesa...</p>
+    }
+    else
+    {
+        <p class="lead mb-5">Mesa N° @mesaId</p>
+    }
+
+    <div class="d-grid gap-3 col-10 col-md-8 col-lg-6 mx-auto">
+
+        @if (isLoading)
+        {
+            <a class="btn btn-secondary btn-lg p-3 disabled" href="#">Cargando...</a>
+        }
+        else if (partidaEnCurso != null)
+        {
+            <!-- ESTADO: HAY PARTIDA EN CURSO -->
+            <a href="@($"/juego/{partidaEnCurso.MesaId}")" class="btn btn-warning btn-lg p-3">
+                <i class="bi bi-arrow-right-circle-fill me-2"></i> Unirse a la Partida
+            </a>
+
+            <button class="btn btn-danger btn-md" @onclick="CancelarPartida">
+                <i class="bi bi-x-circle"></i> Eliminar Partida en Curso
+            </button>
+        }
+        else
+        {
+            <!-- ESTADO: NO HAY PARTIDA -->
+            <a href="/setuppartida" class="btn btn-success btn-lg p-3">
+                <i class="bi bi-play-circle-fill me-2"></i> Nueva Partida
+            </a>
+        }
+
+        <hr class="my-3" />
+
+        <!-- Botones de Administración -->
+        <a href="/gestionjugadores" class="btn btn-primary btn-lg p-3">
+            <i class="bi bi-people-fill me-2"></i> Gestionar Jugadores
+        </a>
+
+        <!-- Botón de Rankings (para el futuro) -->
+        <a href="/rankings" class="btn btn-warning btn-lg p-3">
+            <i class="bi bi-trophy-fill me-2"></i> Ver Rankings
+        </a>
+
+    </div>
+</div>
+
+@code {
+    private int mesaId;
+    private PartidaActual? partidaEnCurso;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // 1. Obtener la configuración directamente
+            mesaId = Configuration.GetValue<int>("StationSettings:MesaId");
+            if (mesaId == 0) { mesaId = 1; } 
+
+            // 2. Comprobar si hay una partida en curso directamente en la BD
+            partidaEnCurso = await DbContext.PartidasActuales.FindAsync(mesaId);
+        }
+        catch (Exception ex)
+        {
+            // Manejar otros errores (ej. la API no está corriendo)
+            Console.WriteLine($"Error al cargar el estado del dashboard: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Método para el botón de cancelar
+    private async Task CancelarPartida()
+    {
+        if (partidaEnCurso == null) return;
+
+        var confirmado = await JSRuntime.InvokeAsync<bool>("Swal_confirm",
+        "¿Eliminar Partida?",
+        $"Vas a eliminar la partida en curso en la <strong>Mesa N° {mesaId}</strong>. Esta acción no se puede deshacer.",
+        "error",
+        "Sí, ¡eliminar!");
+
+        if (confirmado)
+        {
+            try
+            {
+                // Llamamos directamente al servicio centralizado
+                await PartidaService.CancelarPartidaAsync(mesaId);
+
+                await JSRuntime.InvokeVoidAsync("showToastNotification", "success", "Partida cancelada correctamente.");
+                await Task.Delay(1000);
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("showToastNotification", "error", $"No se pudo cancelar la partida: {ex.Message}");
+            }
+        }
+    }
+
+    // Pequeña clase auxiliar para deserializar la configuración
+    public class StationConfigDto
+    {
+        public int MesaId { get; set; }
+    }
+}

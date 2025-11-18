@@ -1,0 +1,93 @@
+﻿@using ATMScoreBoard.Shared
+@using ATMScoreBoard.Shared.Models
+@using ATMScoreBoard.Web.DTOs
+@using System.Net.Http.Json
+@using ATMScoreBoard.Web.Services
+
+@inject PartidaService PartidaService
+
+<div id="scoring-area">
+    
+    <div class="row">
+        <!-- Botones Equipo A -->
+        <div class="col-4">           
+            <div class="flex-5-cols">
+                @for (int i = 1; i <= 16; i++)
+                {
+                    int bola = (i > 15) ? 0 : i;
+                    
+                    string bolaAtenuada = bolasA.Contains(bola) || bolasB.Contains(bola) ? "bola-atenuada" : "";
+                    <div class="">
+                        <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(partidaActual.EquipoAId, bola)">
+                            <img src="/images/bola-@(bola.ToString("D2")).png" class="img-fluid" />
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+        <!-- Botones Equipo B -->
+        <div class="col-4 offset-4">            
+            <div class=" flex-5-cols ">
+                @for (int i = 1; i <= 16; i++)
+                {
+                    int bola = (i > 15) ? 0 : i;
+                    string bolaAtenuada = bolasA.Contains(bola) || bolasB.Contains(bola) ? "bola-atenuada" : "";
+                    <div>
+                        <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(partidaActual.EquipoBId, bola)">
+                            <img src="/images/bola-@(bola.ToString("D2")).png" class="img-fluid" />
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    public PartidaActual? partidaActual { get; set; }
+
+    [Parameter] public EventCallback OnEstadoJuegoCambiado { get; set; }
+    [Parameter] public List<int> bolasA { get; set; } = new();
+    [Parameter] public List<int> bolasB { get; set; } = new();
+
+    private string GetNombresFromNavigation(Equipo equipo)
+    {
+        var nombres = equipo.EquipoJugadores.Select(ej => ej.Jugador.Nombre).ToList();
+        return string.Join(" y ", nombres);
+    }
+
+    private async Task AnotarBola(int equipoId, int numeroBola)
+    {
+        if (partidaActual == null) return;
+
+        var jugadorId = partidaActual.EquipoA.Id == equipoId
+            ? partidaActual.EquipoA.EquipoJugadores.First().JugadorId
+            : partidaActual.EquipoB.EquipoJugadores.First().JugadorId;
+
+        var accion = new AccionJuegoDto
+        {
+            MesaId = partidaActual.MesaId,
+            TipoAccion = "EmbolsarBola",
+            Payload = new EmbolsarBolaPayload
+            {
+                EquipoId = jugadorId,
+                NumeroBola = numeroBola
+            }
+        };
+
+        try
+        {
+            // LLAMADA DIRECTA AL SERVICIO
+            await PartidaService.RealizarAccionAsync(accion);
+
+            // Si tiene éxito, notificamos al padre para que refresque
+            await OnEstadoJuegoCambiado.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            // Manejar el error (por ejemplo, con un SweetAlert)
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Acción Inválida", ex.Message, "error");
+        }
+    }
+}

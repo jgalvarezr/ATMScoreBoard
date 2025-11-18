@@ -11,6 +11,6 @@ namespace ATMScoreBoard.Shared.Models
         public string Nombre { get; set; } = string.Empty;
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
-        public virtual ICollection<EquipoJugador> EquipoJugadores { get; set; }
+        public virtual ICollection<EquipoJugador> EquipoJugadores { get; set; } = new List<EquipoJugador>();
     }
 }

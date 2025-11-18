@@ -20,5 +20,11 @@ namespace ATMScoreBoard.Shared.Models
         public int? EquipoLisasId { get; set; } // Para Bola 8
 
         public DateTime FechaInicio { get; set; } = DateTime.UtcNow;
+
+        [ForeignKey("EquipoAId")]
+        public virtual Equipo? EquipoA { get; set; }
+
+        [ForeignKey("EquipoBId")]
+        public virtual Equipo? EquipoB { get; set; }
     }
 }

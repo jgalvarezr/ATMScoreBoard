@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ATMScoreBoard.Shared.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -72,6 +72,22 @@ namespace ATMScoreBoard.Shared.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PartidasActualesBolas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MesaId = table.Column<int>(type: "int", nullable: false),
+                    EquipoId = table.Column<int>(type: "int", nullable: false),
+                    NumeroBola = table.Column<int>(type: "int", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PartidasActualesBolas", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PartidasActuales",
                 columns: table => new
                 {
@@ -86,35 +102,18 @@ namespace ATMScoreBoard.Shared.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PartidasActuales", x => x.MesaId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PartidasActualesBolas",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MesaId = table.Column<int>(type: "int", nullable: false),
-                    JugadorId = table.Column<int>(type: "int", nullable: false),
-                    NumeroBola = table.Column<int>(type: "int", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PartidasActualesBolas", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TiposJuego",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TiposJuego", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PartidasActuales_Equipos_EquipoAId",
+                        column: x => x.EquipoAId,
+                        principalTable: "Equipos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PartidasActuales_Equipos_EquipoBId",
+                        column: x => x.EquipoBId,
+                        principalTable: "Equipos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -151,6 +150,16 @@ namespace ATMScoreBoard.Shared.Migrations
                 table: "Jugadores",
                 column: "Nombre",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PartidasActuales_EquipoAId",
+                table: "PartidasActuales",
+                column: "EquipoAId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PartidasActuales_EquipoBId",
+                table: "PartidasActuales",
+                column: "EquipoBId");
         }
 
         /// <inheritdoc />
@@ -172,13 +181,10 @@ namespace ATMScoreBoard.Shared.Migrations
                 name: "PartidasActualesBolas");
 
             migrationBuilder.DropTable(
-                name: "TiposJuego");
+                name: "Jugadores");
 
             migrationBuilder.DropTable(
                 name: "Equipos");
-
-            migrationBuilder.DropTable(
-                name: "Jugadores");
         }
     }
 }

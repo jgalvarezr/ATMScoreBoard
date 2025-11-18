@@ -1,0 +1,166 @@
+﻿@page "/gestionjugadores"
+@using ATMScoreBoard.Shared
+@using ATMScoreBoard.Shared.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory 
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Gestión de Jugadores</PageTitle>
+
+<div class="row align-items-center my-3">
+    <div class="col">
+        <h1>Gestión de Jugadores</h1>
+    </div>
+    <div class="col-auto">
+        <!-- Botón para volver al Dashboard -->
+        <a href="/" class="btn btn-secondary"><i class="bi bi-house-door-fill"></i></a>
+        <!-- Botón para crear nuevo, lo movemos aquí para agrupar acciones -->
+        <a href="/editarjugador" class="btn btn-success ms-2"><i class="bi bi-plus-circle"></i> Nuevo</a>
+    </div>
+</div>
+
+@if (jugadores == null)
+{
+    <p><em>Cargando jugadores...</em></p>
+}
+else
+{
+    <table class="table table-dark table-striped table-dark-custom">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var jugador in jugadores.OrderBy(j => j.Nombre))
+            {
+                <tr>
+                    <td>
+                        @jugador.Nombre
+                        @if (!jugador.IsActive)
+                        {
+                            <span class="badge text-warning ms-2">
+                                <i class="bi bi-exclamation-diamond-fill"></i>
+                                </span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a href="@($"/editarjugador/{jugador.Id}")" class="btn btn-primary btn-sm me-1" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        @if (jugador.IsActive)
+                        {
+                            <button class="btn btn-warning btn-sm" title="Archivar" @onclick="() => EliminarOArchivar(jugador)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-info btn-sm" title="Reactivar" @onclick="() => Reactivar(jugador)">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<Jugador>? jugadores;
+
+    // Este método se ejecuta automáticamente cuando el componente se inicializa
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarJugadores();
+    }
+
+    private async Task CargarJugadores()
+    {
+        using var context = DbContextFactory.CreateDbContext();
+        jugadores = await context.Jugadores.AsNoTracking().ToListAsync();
+    }
+
+
+
+
+    private async Task EliminarOArchivar(Jugador jugador)
+    {
+        // 1. Comprobar si el jugador tiene partidas jugadas
+
+        using var context = DbContextFactory.CreateDbContext();
+        bool tienePartidas = await context.EquipoJugadores
+            .AnyAsync(ej => ej.JugadorId == jugador.Id &&
+                           context.Partidas.Any(p => p.EquipoAId == ej.EquipoId || p.EquipoBId == ej.EquipoId));
+
+        if (tienePartidas)
+        {
+            // --- Lógica de ARCHIVADO (Soft Delete) ---
+            var confirmado = await JSRuntime.InvokeAsync<bool>("Swal_confirm",
+                "Archivar Jugador",
+                $"El jugador <strong>{jugador.Nombre}</strong> tiene partidas jugadas y no puede ser eliminado. ¿Desea archivarlo en su lugar?",
+                "warning",
+                "Sí, ¡archivar!");
+
+            if (confirmado)
+            {
+                var jugadorParaArchivar = await context.Jugadores.FindAsync(jugador.Id);
+                if (jugadorParaArchivar != null)
+                {
+                    jugadorParaArchivar.IsActive = false;
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
+        else
+        {
+            // --- Lógica de ELIMINACIÓN FÍSICA (Hard Delete) ---
+            var confirmado = await JSRuntime.InvokeAsync<bool>("Swal_confirm",
+                "Eliminar Jugador Permanentemente",
+                $"El jugador <strong>{jugador.Nombre}</strong> no tiene partidas jugadas y será eliminado permanentemente. Esta acción no se puede deshacer.",
+                "error",
+                "Sí, ¡eliminar!");
+
+            if (confirmado)
+            {
+                var jugadorParaEliminar = await context.Jugadores.FindAsync(jugador.Id);
+                if (jugadorParaEliminar != null)
+                {
+                    context.Jugadores.Remove(jugadorParaEliminar);
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
+
+        // Recargamos la lista y forzamos la actualización de la UI
+        await CargarJugadores();
+        StateHasChanged();
+    }
+
+    private async Task Reactivar(Jugador jugador)
+    {
+        var confirmado = await JSRuntime.InvokeAsync<bool>("Swal_confirm",
+            "¿Reactivar Jugador?",
+            $"El jugador <strong>{jugador.Nombre}</strong> volverá a estar activo.",
+            "info",
+            "Sí, ¡reactivar!");
+
+        if (confirmado)
+        {
+            using var context = DbContextFactory.CreateDbContext();
+
+            var jugadorParaActualizar = await context.Jugadores.FindAsync(jugador.Id);
+            if (jugadorParaActualizar != null)
+            {
+                jugadorParaActualizar.IsActive = true;
+                await context.SaveChangesAsync();
+                await CargarJugadores();
+                StateHasChanged();
+            }
+        }
+    }
+}
