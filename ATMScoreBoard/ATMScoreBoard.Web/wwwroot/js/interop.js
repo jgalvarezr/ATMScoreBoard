@@ -15,3 +15,29 @@ window.Swal_confirm = (title, html, icon, confirmButtonText) => {
         return result.isConfirmed;
     });
 }
+
+window.Swal_message = (title, text, icon) => {
+    return Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        timer: 2000,
+        showConfirmButton: false,
+        
+    }).then((result) => {
+        // Devolvemos 'true' solo si el usuario hizo clic en el botón de confirmación
+        return result.isConfirmed;
+    });
+}
+
+window.showToast = (icon, title) => {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: icon,
+        title: title,
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+}

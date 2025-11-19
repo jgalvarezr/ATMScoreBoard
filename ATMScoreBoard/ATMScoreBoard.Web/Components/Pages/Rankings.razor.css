@@ -1,0 +1,15 @@
+﻿.card {
+    border-color: #313539;
+    background-color: #262A2E;
+    color: #e1e5e9;
+    padding: 0px;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.card-header {
+    background-color: #363A3E;
+    padding: 5px 0 5px 10px;
+    color: var(--bs-warning);
+    font-size: 1.4rem;
+}

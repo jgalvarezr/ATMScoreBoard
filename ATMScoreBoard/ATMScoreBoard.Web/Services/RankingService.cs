@@ -76,17 +76,21 @@ namespace ATMScoreBoard.Web.Services
             using var context = _dbContextFactory.CreateDbContext();
 
             string sql = $@"
-        SELECT 
-            j.Id, 
-            j.Nombre, 
-            SUM(p.Puntos) AS PuntosRanking	
-        FROM dbo.Jugadores j
-        INNER JOIN dbo.EquipoJugadores ej ON ej.JugadorId = j.Id
-        INNER JOIN dbo.PuntosHistorico p ON p.EquipoId = ej.EquipoId
-        WHERE p.Orden <= {{0}} AND p.Dias < {{1}}
-        GROUP BY j.Id, j.Nombre
-        ORDER BY PuntosRanking DESC;
-    ";
+                            with ranking as (   select          j.Id, 
+                                                                j.Nombre, 
+                                                                sum(p.Puntos) AS PuntosRanking	
+                                                from        dbo.Jugadores j
+                                                inner join  dbo.EquipoJugadores ej on ej.JugadorId = j.Id
+                                                INNER JOIN  dbo.PuntosHistorico p on p.EquipoId = ej.EquipoId
+                                                where       p.Orden <= 20 AND p.Dias < 90
+                                                group by    j.Id, j.Nombre)
+
+                            select		j.Id, 
+			                            j.Nombre,
+                                        isnull(r.PuntosRanking, 0) as PuntosRanking
+                            from		Jugadores j
+                            left join   ranking r on r.Id = j.id
+                            order by    PuntosRanking desc, j.Nombre;";
 
             var ranking = await context.Set<EstadisticaJugadorRanking>()
                 .FromSqlRaw(sql, partidasParaRanking, diasParaRanking)

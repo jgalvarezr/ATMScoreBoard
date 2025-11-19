@@ -53,14 +53,17 @@ else
                 break;
             case TipoJuego.Bola8:
                 <!-- <JuegoBola8 /> -->
-                <p>Aquí irá el componente para jugar Bola 8.</p>
+                <_JuegoBola8 OnEstadoJuegoCambiado="EstadoCambiado"
+                             bolasA="bolasA"
+                             bolasB="bolasB"
+                             EnModoCorreccion="EnModoCorreccion" />
                 break;
             default:
                 <div class="alert alert-warning">Esta modalidad de juego aún no está implementada.</div>
                 break;
         }
 
-        <hr class="my-4" />
+        <hr class="my-2" />
 
         <!-- 3. FOOTER (futuro componente _AccionesPartida) -->
         <div>
@@ -157,24 +160,50 @@ else
         bolasA.Clear();
         bolasB.Clear();
 
+
         foreach (var bola in bolasGuardadas)
         {
+            int puntos = 0;
 
-
-            int puntos = bola.NumeroBola == 0 ? 10 : bola.NumeroBola;
-
-            if (bola.EquipoId == partidaActual.EquipoAId)
+            switch (partidaActual.TipoJuegoId)
             {
-                puntuacionA += puntos;
-                bolasA.Add(bola.NumeroBola);
-            }
-            else if (bola.EquipoId == partidaActual.EquipoBId)
-            {
-                puntuacionB += puntos;
-                bolasB.Add(bola.NumeroBola);
+                case 1:
+                    if (bola.EquipoId == partidaActual.EquipoAId)
+                    {
+                        puntuacionA += 1;
+                        bolasA.Add(bola.NumeroBola);
+                    }
+                    else if (bola.EquipoId == partidaActual.EquipoBId)
+                    {
+                        puntuacionB += 1;
+                        bolasB.Add(bola.NumeroBola);
+                    } 
+                    else if (bola.EquipoId == null)
+                    {
+                        puntuacionA += 1;
+                        puntuacionB += 1;
+                        bolasA.Add(bola.NumeroBola);
+                        bolasB.Add(bola.NumeroBola);
+                    }
+                    break;
+
+                case 4:
+                    puntos = bola.NumeroBola == 0 ? 10 : bola.NumeroBola;
+                    if (bola.EquipoId == partidaActual.EquipoAId)
+                    {
+                        puntuacionA += puntos;
+                        bolasA.Add(bola.NumeroBola);
+                    }
+                    else if (bola.EquipoId == partidaActual.EquipoBId)
+                    {
+                        puntuacionB += puntos;
+                        bolasB.Add(bola.NumeroBola);
+                    }
+                    break;
             }
 
             resultadoJuego = await PartidaService.ChequearEstadoPartidaAsync(partidaActual.MesaId);
+            await PartidaService.NotificarCambioDeEstado(partidaActual.MesaId);
         }
     }
 

@@ -69,11 +69,11 @@
         {
             MesaId = partidaActual.MesaId,
             TipoAccion = tipoAccion,
-            Payload = new EmbolsarBolaPayload
+            Payload =  System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(new 
             {
                 EquipoId = equipoId,
                 NumeroBola = numeroBola
-            }
+            })).RootElement
         };
 
         try

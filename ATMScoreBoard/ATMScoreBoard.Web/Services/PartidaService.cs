@@ -1,18 +1,26 @@
 ﻿using ATMScoreBoard.Shared;
+using ATMScoreBoard.Shared.DTOs;
 using ATMScoreBoard.Shared.Models;
 using ATMScoreBoard.Web.DTOs;
+using ATMScoreBoard.Web.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using System.Text.Json;
 
 namespace ATMScoreBoard.Web.Services
 {
     public class PartidaService
     {
         private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
+        private readonly IHubContext<MarcadorHub> _hubContext;
+        private readonly RankingService _rankingService;
 
-        public PartidaService(IDbContextFactory<ApplicationDbContext> dbContextFactory)
+        public PartidaService(IDbContextFactory<ApplicationDbContext> dbContextFactory, IHubContext<MarcadorHub> hubContext, RankingService rankingService)
         {
             _dbContextFactory = dbContextFactory;
+            _hubContext = hubContext;
+            _rankingService = rankingService;
         }
 
         public async Task<PartidaActual> IniciarPartidaAsync(IniciarPartidaDto dto)
@@ -54,6 +62,7 @@ namespace ATMScoreBoard.Web.Services
             await context.PartidasActuales.AddAsync(partidaActual);
             await context.SaveChangesAsync();
 
+            await NotificarCambioDeEstado(dto.MesaId);
             return partidaActual;
         }
 
@@ -99,37 +108,38 @@ namespace ATMScoreBoard.Web.Services
             switch (dto.TipoAccion)
             {
                 case "EmbolsarBola":
-                    if (dto.Payload == null) throw new Exception("Payload inválido.");
+                    var embolsarPayload = dto.Payload.Deserialize<EmbolsarBolaPayload>();
+                    if (embolsarPayload == null) throw new Exception("Payload inválido.");
 
                     bool bolaYaEmbolsada = await context.PartidasActualesBolas
-                        .AnyAsync(b => b.MesaId == dto.MesaId && b.NumeroBola == dto.Payload.NumeroBola);
+                        .AnyAsync(b => b.MesaId == dto.MesaId && b.NumeroBola == embolsarPayload.NumeroBola);
 
                     if (bolaYaEmbolsada)
                     {
-                        throw new Exception($"La bola {dto.Payload.NumeroBola} ya ha sido embolsada en esta partida.");
+                        throw new Exception($"La bola {embolsarPayload.NumeroBola} ya ha sido embolsada en esta partida.");
                     }
-
 
                     var nuevaBola = new PartidaActualBolas
                     {
                         MesaId = dto.MesaId,
-                        EquipoId = dto.Payload.EquipoId,
-                        NumeroBola = dto.Payload.NumeroBola,
+                        EquipoId = embolsarPayload.EquipoId,
+                        NumeroBola = embolsarPayload.NumeroBola,
                         Timestamp = DateTime.UtcNow
                     };
 
                     await context.PartidasActualesBolas.AddAsync(nuevaBola);
+                    Console.WriteLine("API: Preparando para enviar notificación SignalR...");
                     await context.SaveChangesAsync();
                     break;
 
                 case "CorregirBola":
-                    if (dto.Payload == null)
-                        throw new Exception("Payload inválido.");
+                    var corregirPayload = dto.Payload.Deserialize<EmbolsarBolaPayload>();
+                    if (corregirPayload == null) throw new Exception("Payload inválido.");
 
                     // Buscamos la bola específica que se quiere corregir
                     var bolaACorregir = await context.PartidasActualesBolas
                         .FirstOrDefaultAsync(b => b.MesaId == dto.MesaId &&
-                                                  b.NumeroBola == dto.Payload.NumeroBola);
+                                                  b.NumeroBola == corregirPayload.NumeroBola);
 
                     if (bolaACorregir != null)
                     {
@@ -143,11 +153,44 @@ namespace ATMScoreBoard.Web.Services
                         // Por ahora, simplemente no hacemos nada si no la encontramos.
                     }
                     break;
+                
+                case "AsignarGruposBola8":
+                    var asignarPayload = dto.Payload.Deserialize<AsignarGruposPayload>();
+                    if (asignarPayload == null) throw new Exception("Payload inválido.");
 
+                    // Asignamos el equipo de lisas en la partida actual
+                    partidaActual.EquipoLisasId = asignarPayload.EquipoLisasId;
+                    context.PartidasActuales.Update(partidaActual);
 
+                    // Actualizamos retroactivamente las bolas "huérfanas"
+                    var bolasHuerfanas = await context.PartidasActualesBolas
+                        .Where(b => b.MesaId == dto.MesaId && b.EquipoId == null)
+                        .ToListAsync();
+
+                    if (bolasHuerfanas.Any())
+                    {
+                        var bolasLisasDef = new[] { 1, 2, 3, 4, 5, 6, 7 };
+                        var equipoRayadasId = partidaActual.EquipoAId == asignarPayload.EquipoLisasId
+                            ? partidaActual.EquipoBId
+                            : partidaActual.EquipoAId;
+
+                        foreach (var bola in bolasHuerfanas)
+                        {
+                            bola.EquipoId = bolasLisasDef.Contains(bola.NumeroBola)
+                                ? asignarPayload.EquipoLisasId
+                                : equipoRayadasId;
+
+                            context.PartidasActualesBolas.Update(bola);
+                        }
+                    }
+                    await context.SaveChangesAsync();
+                    break;
                 default:
                     throw new Exception("Tipo de acción no reconocido.");
             }
+
+            await NotificarCambioDeEstado(dto.MesaId);
+
         }
 
         public async Task FinalizarPartidaAsync(FinalizarPartidaDto dto)
@@ -158,7 +201,7 @@ namespace ATMScoreBoard.Web.Services
             if (partidaActual == null)
                 throw new Exception("No se encontró la partida en curso para finalizar.");
 
-            
+
             // 1. Crear el registro histórico
             var partidaHistorica = new Partida
             {
@@ -182,6 +225,8 @@ namespace ATMScoreBoard.Web.Services
             var equiposIds = new List<int> { partidaActual.EquipoAId, partidaActual.EquipoBId };
             await LimpiezaEquipo(equiposIds);
 
+            await _hubContext.Clients.Group($"Mesa_{dto.MesaId}").SendAsync("PartidaFinalizada");
+
         }
 
         public async Task CancelarPartidaAsync(int mesaId)
@@ -204,14 +249,15 @@ namespace ATMScoreBoard.Web.Services
 
             // 2. Eliminar la partida actual
             context.PartidasActuales.Remove(partidaActual);
-            
+
             await context.SaveChangesAsync();
 
             // 3. Lógica de limpieza de equipos huérfanos
             var equiposIds = new List<int> { partidaActual.EquipoAId, partidaActual.EquipoBId };
             await LimpiezaEquipo(equiposIds);
-        }
 
+            await _hubContext.Clients.Group($"Mesa_{mesaId}").SendAsync("PartidaFinalizada");
+        }
 
         private async Task LimpiezaEquipo(List<int> equiposIds)
         {
@@ -236,7 +282,6 @@ namespace ATMScoreBoard.Web.Services
             }
             await context.SaveChangesAsync();
         }
-
 
         public async Task<ResultadoChequeo> ChequearEstadoPartidaAsync(int mesaId)
         {
@@ -276,7 +321,7 @@ namespace ATMScoreBoard.Web.Services
                 var bolasRayadas = new HashSet<int> { 9, 10, 11, 12, 13, 14, 15 };
 
                 var equipoRival = equipoActual == EquipoIdentifier.EquipoA ? EquipoIdentifier.EquipoB : EquipoIdentifier.EquipoA;
-                
+
                 bool metioTodasLisas = bolasLisas.IsSubsetOf(bolasPropias);
                 bool metioTodasRayadas = bolasRayadas.IsSubsetOf(bolasPropias);
                 bool metioTodas = metioTodasLisas || metioTodasRayadas;
@@ -285,10 +330,11 @@ namespace ATMScoreBoard.Web.Services
                 {
                     if (bolasPropias.Contains(0))
                         return equipoRival;
-                    else if (bolasPropias.Contains(8) )
+                    else if (bolasPropias.Contains(8))
                         return equipoActual;
 
-                } else
+                }
+                else
                 {
                     if (bolasPropias.Contains(8))
                         return equipoRival;
@@ -300,8 +346,9 @@ namespace ATMScoreBoard.Web.Services
             var resultado = new ResultadoChequeo();
 
             var ChequearEquipoA = ChequearEquipo(EquipoIdentifier.EquipoA, bolasA, bolasB);
-            
-            if (ChequearEquipoA != EquipoIdentifier.Ninguno) {
+
+            if (ChequearEquipoA != EquipoIdentifier.Ninguno)
+            {
 
                 resultado.Ganador = ChequearEquipoA;
 
@@ -337,17 +384,18 @@ namespace ATMScoreBoard.Web.Services
                 Estado = EstadoPartida.EnCurso,
                 Ganador = EquipoIdentifier.Ninguno
             };
-            
+
             if (bolasA.Contains(9))
             {
                 resultado.Estado = bolasB.Count() == 0 ? EstadoPartida.Zapatero : EstadoPartida.Ganada;
                 resultado.Ganador = EquipoIdentifier.EquipoA;
             }
-            else if(bolasB.Contains(9)){
+            else if (bolasB.Contains(9))
+            {
                 resultado.Estado = bolasA.Count() == 0 ? EstadoPartida.Zapatero : EstadoPartida.Ganada;
                 resultado.Ganador = EquipoIdentifier.EquipoB;
             }
-            
+
             return resultado;
         }
 
@@ -408,11 +456,157 @@ namespace ATMScoreBoard.Web.Services
         }
 
 
+        public async Task NotificarCambioDeEstado(int mesaId)
+        {
+            // Construimos el DTO con el estado más reciente
+            var estadoDto = await ConstruirEstadoPartidaDtoAsync(mesaId);
+            await _hubContext.Clients.Group($"Mesa_{mesaId}").SendAsync("PartidaActualizada", estadoDto);
+        }
+
+        // Método que construye el DTO (reemplaza al que teníamos en el controlador)
+        // En Services/PartidaService.cs
+
+        public async Task<EstadoPartidaDto?> ConstruirEstadoPartidaDtoAsync(int mesaId)
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+
+            var partida = await context.PartidasActuales
+                .Include(p => p.EquipoA)
+                    .ThenInclude(e => e.EquipoJugadores)
+                    .ThenInclude(ej => ej.Jugador)
+                .Include(p => p.EquipoB)
+                    .ThenInclude(e => e.EquipoJugadores)
+                    .ThenInclude(ej => ej.Jugador)
+                .AsNoTracking() 
+                .FirstOrDefaultAsync(p => p.MesaId == mesaId);
+
+
+            if (partida == null) return null;
+
+            // --- 1. Cargar Datos Base (Rankings, Victorias, etc.) en paralelo ---
+            var rankingJugadores = await _rankingService.ObtenerRankingJugadoresAsync(20, 90);
+            var rankingEquipos = await _rankingService.ObtenerRankingEquiposAsync(20, 90);
+            var partidasHistoricas = await context.Partidas.AsNoTracking().ToListAsync();
+            var bolas = await context.PartidasActualesBolas.Where(b => b.MesaId == mesaId).AsNoTracking().ToListAsync();
+
+            // --- 2. Función Auxiliar para construir las estadísticas de UN equipo ---
+            
+
+            // --- 3. Calcular Estado del Juego Actual ---
+            var bolasA = bolas.Where(b => b.EquipoId == partida.EquipoAId).Select(b => b.NumeroBola).ToList();
+            var bolasB = bolas.Where(b => b.EquipoId == partida.EquipoBId).Select(b => b.NumeroBola).ToList();
+
+
+            var puntuacionA = 0;
+            var puntuacionB = 0;
+
+            var tipoJuego = (TipoJuego)partida.TipoJuegoId;
+
+            switch (tipoJuego)
+            {
+                case TipoJuego.Chapolin:
+                    puntuacionA = bolasA.Sum(b => b == 0 ? 10 : b);
+                    puntuacionB = bolasB.Sum(b => b == 0 ? 10 : b);
+                    break;
+
+                case TipoJuego.Bola8:
+
+                    var bolasDeGrupoA = partida.EquipoLisasId.HasValue
+            ? (partida.EquipoLisasId == partida.EquipoAId
+                ? bolasA.Where(b => b >= 1 && b <= 7)
+                : bolasA.Where(b => b >= 9 && b <= 15))
+            : bolasA.Where(b => b != 0 && b != 8); // Mesa abierta, contamos todas menos 8 y blanca
+
+                    var bolasDeGrupoB = partida.EquipoLisasId.HasValue
+                        ? (partida.EquipoLisasId == partida.EquipoBId
+                            ? bolasB.Where(b => b >= 1 && b <= 7)
+                            : bolasB.Where(b => b >= 9 && b <= 15))
+                        : bolasB.Where(b => b != 0 && b != 8);
+
+                    puntuacionA = bolasDeGrupoA.Count();
+                    puntuacionB = bolasDeGrupoB.Count();
+                    break;
+
+                case TipoJuego.Bola9:
+                case TipoJuego.Bola10:
+                    // Para Bola 9 y 10, la puntuación es simplemente el total de bolas embolsadas.
+                    puntuacionA = bolasA.Count;
+                    puntuacionB = bolasB.Count;
+                    break;
+
+                default:
+                    puntuacionA = 0;
+                    puntuacionB = 0;
+                    break;
+            }
+
+
+            var resultadoChequeo = await ChequearEstadoPartidaAsync(mesaId); // Este método ahora es más simple
+
+            // --- 4. Construir y Devolver el DTO Final ---
+            return new EstadoPartidaDto
+            {
+                MesaId = partida.MesaId,
+                TipoJuegoId = partida.TipoJuegoId,
+                EquipoA = ConstruirStatsEquipo(partida.EquipoAId, partida, rankingJugadores, rankingEquipos,partidasHistoricas),
+                EquipoB = ConstruirStatsEquipo(partida.EquipoBId, partida, rankingJugadores, rankingEquipos, partidasHistoricas),
+                Puntuaciones = new Dictionary<string, int> { { "a", puntuacionA }, { "b", puntuacionB } },
+                BolasEntroneradas = new Dictionary<string, List<int>> { { "a", bolasA }, { "b", bolasB } },
+                Estado = resultadoChequeo.Estado,
+                Ganador = resultadoChequeo.Ganador,
+                EquipoLisasId = partida.EquipoLisasId,
+                BandaEquipoA = partida.BandaEquipoA
+            };
+        }
+
+        private EquipoEstadisticasDto ConstruirStatsEquipo(int equipoId,
+            PartidaActual partida,
+            List<EstadisticaJugadorRanking> rankingJugadores,
+            List<EstadisticaEquipoColRanking> rankingEquipos,
+            List<Partida> partidasHistoricas)
+        {
+            var equipo = equipoId == partida.EquipoAId ? partida.EquipoA : partida.EquipoB;
+
+            if (equipo == null) return new EquipoEstadisticasDto();
+
+            var rankingDict = rankingJugadores.ToDictionary(r => r.Id, r => r.PuntosRanking);
+            var jugadoresOrdenados = equipo.EquipoJugadores
+                .OrderBy(ej => rankingDict.GetValueOrDefault(ej.JugadorId, 0))
+                .ToList();
+
+            var rankingEquipo = rankingEquipos.Select((r, i) => new { Rank = r, Index = i + 1 })
+                                            .FirstOrDefault(x => x.Rank.Id == equipoId);
+
+            var otroEquipoId = equipoId == partida.EquipoAId ? partida.EquipoBId : partida.EquipoAId;
+
+            var res = new EquipoEstadisticasDto
+            {
+                Id = equipoId,
+                Nombre = string.Join(" y ", jugadoresOrdenados.Select(ej => ej.Jugador.Nombre)),
+                Jugadores = jugadoresOrdenados.Select(ej => {
+                    var rankingJugador = rankingJugadores.Select((r, i) => new { Rank = r, Index = i + 1 })
+                                                         .FirstOrDefault(x => x.Rank.Id == ej.JugadorId);
+                    return new JugadorSimpleDto
+                    {
+                        Id = ej.JugadorId,
+                        Nombre = ej?.Jugador?.Nombre ?? "",
+                        PosicionRanking = rankingJugador?.Index ?? 0,
+                        PuntosRanking = rankingJugador?.Rank.PuntosRanking ?? 0
+                    };
+                }).ToList(),
+                PosicionRanking = rankingEquipo?.Index ?? 0,
+                PuntosRanking = rankingEquipo?.Rank.PuntosRanking ?? 0,
+                VictoriasGlobales = partidasHistoricas.Count(p => p.EquipoGanadorId == equipoId),
+                VictoriasH2H = partidasHistoricas.Count(p => p.EquipoGanadorId == equipoId && (p.EquipoAId == otroEquipoId || p.EquipoBId == otroEquipoId))
+            };
+
+            return res;
+        }
+
     }
+        
 
-
-    public enum EquipoIdentifier { EquipoA, EquipoB, Ninguno }
-    public enum EstadoPartida { EnCurso, Ganada, Zapatero }
+    
     public class ResultadoChequeo
     {
         public EstadoPartida Estado { get; set; } = EstadoPartida.EnCurso;

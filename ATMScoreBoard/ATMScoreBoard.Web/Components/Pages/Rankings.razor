@@ -6,7 +6,7 @@
 
 <PageTitle>Rankings</PageTitle>
 
-<div class="row align-items-center mb-3">
+<div class="row align-items-center my-2">
     <div class="col">
         <h1>Rankings</h1>
     </div>
@@ -28,17 +28,17 @@ else
     <div class="row">
         <!-- Columna Ranking de Equipos -->
         <div class="col-lg-6 mb-4">
-            <div class="card h-100 bg-dark-custom border-secondary">
+            <div class="card h-100 bg-dark border-secondary">
                 <div class="card-header">
-                    <h4><i class="bi bi-people-fill me-2"></i>Ranking de Equipos</h4>
+                    <i class="bi bi-people-fill me-2"></i>Ranking de Equipos
                 </div>
                 <div class="card-body">
-                    <table class="table table-dark table-striped table-dark-custom">
+                    <table class="table table-dark">
                         <thead>
-                            <tr>
+                            <tr class="text-success  ">
                                 <th scope="col">#</th>
-                                <th scope="col">Jugador A</th>
-                                <th scope="col">Jugador B</th>
+                                <th scope="col">Equipo</th>
+                                
                                 <th scope="col" class="text-end">Puntos</th>
                             </tr>
                         </thead>
@@ -50,8 +50,7 @@ else
                                     var equipo = rankingEquipos[i];
                                     <tr>
                                         <th scope="row">@(i + 1)</th>
-                                        <td>@equipo.JugadorA</td>
-                                        <td>@equipo.JugadorB</td>
+                                        <td>@equipo.JugadorA @(equipo.JugadorB?.Length > 0 ? " - " + equipo.JugadorB : "")</td>
                                         <td class="text-end fw-bold">@equipo.PuntosRanking</td>
                                     </tr>
                                 }
@@ -72,12 +71,12 @@ else
         <div class="col-lg-6 mb-4">
             <div class="card h-100 bg-dark-custom border-secondary">
                 <div class="card-header">
-                    <h4><i class="bi bi-person-fill me-2"></i>Ranking de Jugadores</h4>
+                    <i class="bi bi-person-fill me-2"></i>Ranking de Jugadores
                 </div>
                 <div class="card-body">
-                    <table class="table table-dark table-striped table-dark-custom">
+                    <table class="table table-dark">
                         <thead>
-                            <tr>
+                            <tr class="text-success  ">
                                 <th scope="col">#</th>
                                 <th scope="col">Nombre</th>
                                 <th scope="col" class="text-end">Puntos</th>

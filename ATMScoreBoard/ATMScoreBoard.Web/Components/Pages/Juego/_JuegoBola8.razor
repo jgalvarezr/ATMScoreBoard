@@ -1,0 +1,192 @@
+﻿@using ATMScoreBoard.Shared
+@using ATMScoreBoard.Shared.Models
+@using ATMScoreBoard.Web.DTOs
+@using ATMScoreBoard.Web.Services
+
+@inject PartidaService PartidaService
+@inject IJSRuntime JSRuntime
+
+@if (partidaActual is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    @if (partidaActual.EquipoLisasId == null)
+    {
+        <!-- ============================================= -->
+        <!-- FASE 1: MESA ABIERTA                          -->
+        <!-- ============================================= -->
+        <div id="fase-mesa-abierta" >
+            
+            <!-- Controles de Asignación -->
+            <div class="row justify-content-between mb-2 ">
+                <div class="col-auto ">
+                    <button class="btn btn-success" @onclick="() => AsignarGrupos(partidaActual.EquipoAId)">
+                        Asignar Lisas a <strong>@GetNombresFromNavigation(partidaActual.EquipoA)</strong>
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <h4 class="text-center text-muted mb-3">Mesa Abierta</h4>
+                </div>
+                <div class="col-auto">
+                     <button class="btn btn-success" @onclick="() => AsignarGrupos(partidaActual.EquipoBId)">
+                        Asignar Lisas a <strong>@GetNombresFromNavigation(partidaActual.EquipoB)</strong>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Parrilla de Bolas Única -->
+            <div class="row justify-content-center">
+                <div class="col-4 col-xxl-3">
+                    <div class="flex-5-cols">
+                        @for (int i = 1; i <= 15; i++)
+                        {
+                            int bola = i;
+                            // Lógica de atenuación para bolas ya embolsadas
+                            string bolaAtenuada = classBola(bola);
+
+                            <div>
+                                <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(null, bola)">
+                                    <img src="/images/bola-@(bola.ToString("D2")).png" class="img-fluid" />
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- ============================================= -->
+        <!-- FASE 2: MESA CERRADA (GRUPOS ASIGNADOS)       -->
+        <!-- ============================================= -->
+        <div id="fase-mesa-cerrada">
+            <h3 class="text-center text-muted mb-3">Mesa Cerrada</h3>
+            <div class="row">
+                <!-- Equipo Lisas -->
+                @{
+                    var equipoLisas = partidaActual.EquipoAId == partidaActual.EquipoLisasId ? partidaActual.EquipoA : partidaActual.EquipoB;
+                    var equipoRayadas = partidaActual.EquipoAId != partidaActual.EquipoLisasId ? partidaActual.EquipoA : partidaActual.EquipoB;
+                    var bolasDelEquipoLisas = partidaActual.EquipoAId == partidaActual.EquipoLisasId ? bolasA : bolasB;
+                    var bolasDelEquipoRayadas = partidaActual.EquipoAId != partidaActual.EquipoLisasId ? bolasA : bolasB;
+                    var bolasLisasRestantes = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 0 };
+                    var bolasRayadasRestantes = new[] { 9, 10, 11, 12, 13, 14, 15, 8, 0 };
+                }
+                <div class="col-4 col-xxl-3">
+                    <div class="flex-3-cols">
+                        @foreach (var bola in bolasLisasRestantes)
+                        {
+                            string bolaAtenuada = classBola(bola);
+                            <div class="">
+                                <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(equipoLisas.Id, bola)">
+                                    <img src="/images/bola-@(bola.ToString("D2")).png" class="img-fluid" />
+                                </button>
+                            </div>
+                        }                        
+                    </div>
+                </div>
+
+                <!-- Equipo Rayadas -->
+                <div class="col-4 offset-4  col-xxl-3 offset-xxl-6">
+                    <div class="flex-3-cols">
+                        @foreach (var bola in bolasRayadasRestantes)
+                        {
+                            string bolaAtenuada = classBola(bola);
+                            <div class="">
+                                <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(equipoRayadas.Id, bola)">
+                                    <img src="/images/bola-@(bola.ToString("D2")).png" class="img-fluid" />
+                                </button>
+                            </div>
+                        }                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [CascadingParameter]
+    public PartidaActual? partidaActual { get; set; }
+
+    [Parameter]
+    public EventCallback OnEstadoJuegoCambiado { get; set; }
+
+    // Recibimos las listas de bolas del padre para saber cuáles atenuar
+    [Parameter] public List<int> bolasA { get; set; } = new();
+    [Parameter] public List<int> bolasB { get; set; } = new();
+    [Parameter] public bool EnModoCorreccion { get; set; }
+
+    // Reutilizamos la función de obtener nombres
+    private string GetNombresFromNavigation(Equipo equipo)
+    {
+        return string.Join(" y ", equipo.EquipoJugadores.Select(ej => ej.Jugador.Nombre));
+    }
+
+    // Método para ANOTAR BOLA (en mesa abierta o cerrada)
+    private async Task AnotarBola(int? equipoId, int numeroBola)
+    {
+        if (partidaActual == null) return;
+
+        string tipoAccion = EnModoCorreccion ? "CorregirBola" : "EmbolsarBola";
+
+        var accion = new AccionJuegoDto
+        {
+            MesaId = partidaActual.MesaId,
+            TipoAccion = tipoAccion,
+            Payload = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(new
+            {
+                NumeroBola = numeroBola,
+                EquipoId = equipoId
+            })).RootElement
+        };
+
+        try
+        {
+            await PartidaService.RealizarAccionAsync(accion);
+            await OnEstadoJuegoCambiado.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", ex.Message, "error");
+        }
+    }
+
+    // Método para ASIGNAR GRUPOS
+    private async Task AsignarGrupos(int equipoLisasId)
+    {
+        if (partidaActual == null) return;
+
+        var accion = new AccionJuegoDto
+        {
+            MesaId = partidaActual.MesaId,
+            TipoAccion = "AsignarGruposBola8",
+            Payload = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(new AsignarGruposPayload
+            {
+                EquipoLisasId = equipoLisasId
+            })).RootElement
+        };
+
+        try
+        {
+            await PartidaService.RealizarAccionAsync(accion);
+            await OnEstadoJuegoCambiado.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", ex.Message, "error");
+        }
+    }
+
+    private String classBola(int bola)
+    {
+        if (!EnModoCorreccion)
+            return bolasA.Contains(bola) || bolasB.Contains(bola) ? "bola-atenuada" : "";
+        else
+            
+            return bolasA.Contains(bola) || bolasB.Contains(bola) ? "" : "bola-atenuada";
+
+    }
+}

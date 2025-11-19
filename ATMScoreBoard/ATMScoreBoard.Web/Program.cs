@@ -1,5 +1,6 @@
 using ATMScoreBoard.Shared;
 using ATMScoreBoard.Web.Components;
+using ATMScoreBoard.Web.Hubs;
 using ATMScoreBoard.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +31,7 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 builder.Services.AddScoped<PartidaService>();
 builder.Services.AddScoped<RankingService>();
 
-
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -51,5 +52,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapControllers();
+
+app.MapHub<MarcadorHub>("/marcadorhub");
 
 app.Run();

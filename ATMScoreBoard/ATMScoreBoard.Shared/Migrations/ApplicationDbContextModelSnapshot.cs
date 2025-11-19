@@ -53,6 +53,38 @@ namespace ATMScoreBoard.Shared.Migrations
                     b.ToTable("EquipoJugadores");
                 });
 
+            modelBuilder.Entity("ATMScoreBoard.Shared.Models.EstadisticaEquipoColRanking", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("JugadorA")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JugadorB")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PuntosRanking")
+                        .HasColumnType("int");
+
+                    b.ToTable("RankingEquipos");
+                });
+
+            modelBuilder.Entity("ATMScoreBoard.Shared.Models.EstadisticaJugadorRanking", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PuntosRanking")
+                        .HasColumnType("int");
+
+                    b.ToTable("RankingJugadores");
+                });
+
             modelBuilder.Entity("ATMScoreBoard.Shared.Models.Jugador", b =>
                 {
                     b.Property<int>("Id")
@@ -173,7 +205,7 @@ namespace ATMScoreBoard.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("EquipoId")
+                    b.Property<int?>("EquipoId")
                         .HasColumnType("int");
 
                     b.Property<int>("MesaId")
@@ -188,6 +220,34 @@ namespace ATMScoreBoard.Shared.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PartidasActualesBolas");
+                });
+
+            modelBuilder.Entity("ATMScoreBoard.Shared.Models.PuntosHistoricoView", b =>
+                {
+                    b.Property<int>("Dias")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EquipoId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("Orden")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("PartidaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Puntos")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RivalId")
+                        .HasColumnType("int");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("PuntosHistorico", (string)null);
                 });
 
             modelBuilder.Entity("ATMScoreBoard.Shared.Models.EquipoJugador", b =>

@@ -1,0 +1,57 @@
+﻿.btn-bola {
+}
+
+.bola-atenuada {
+    filter: opacity(0.2);
+}
+
+.flex-5-cols {
+    display: flex; /* Usamos Flexbox */
+    flex-wrap: wrap; /* Permitimos que salte de línea */
+    justify-content: center; /* ¡La magia para centrar todas las filas, incluyendo la última! */
+    gap: 0.5rem; /* El espacio entre botones */
+}
+
+    /* Le damos el tamaño correcto a cada 'div' que contiene un botón */
+    .flex-5-cols > div {
+        /* 
+       flex-basis de 20% para 5 columnas (100% / 5).
+       Restamos el 'gap' para el cálculo preciso. El cálculo exacto sería
+       (100% / 5) - (gap * 4 / 5) -> calc(20% - 0.4rem), pero lo simplificamos
+       para que sea más legible y funcione bien.
+    */
+        flex: 0 1 calc(25% - 0.5rem);
+    }
+
+        /* (Opcional) Aseguramos que los botones y las imágenes llenen el 'div' */
+        .flex-5-cols > div > button,
+        .flex-5-cols > div > button > img {
+            width: 100%;
+            height: 100%;
+        }
+
+
+.flex-3-cols {
+    display: flex; /* Usamos Flexbox */
+    flex-wrap: wrap; /* Permitimos que salte de línea */
+    justify-content: center; /* ¡La magia para centrar todas las filas, incluyendo la última! */
+    gap: 0.5rem; /* El espacio entre botones */
+}
+
+    /* Le damos el tamaño correcto a cada 'div' que contiene un botón */
+    .flex-3-cols > div {
+        /* 
+       flex-basis de 20% para 5 columnas (100% / 5).
+       Restamos el 'gap' para el cálculo preciso. El cálculo exacto sería
+       (100% / 5) - (gap * 4 / 5) -> calc(20% - 0.4rem), pero lo simplificamos
+       para que sea más legible y funcione bien.
+    */
+        flex: 0 1 calc(33% - 0.5rem);
+    }
+
+        /* (Opcional) Aseguramos que los botones y las imágenes llenen el 'div' */
+        .flex-3-cols > div > button,
+        .flex-3-cols > div > button > img {
+            width: 100%;
+            height: 100%;
+        }

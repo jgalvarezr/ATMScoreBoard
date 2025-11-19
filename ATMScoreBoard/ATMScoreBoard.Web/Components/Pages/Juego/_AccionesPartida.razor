@@ -1,4 +1,5 @@
-﻿@using ATMScoreBoard.Shared.Models
+﻿@using ATMScoreBoard.Shared.DTOs
+@using ATMScoreBoard.Shared.Models
 @using ATMScoreBoard.Web.DTOs
 @using ATMScoreBoard.Web.Services
 @using System.Text.Json
@@ -111,7 +112,7 @@
                 showConfirmButton = false
             });
             await Task.Delay(2000);
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/", forceLoad: true);
         }
         catch (Exception ex)
         {
@@ -127,7 +128,7 @@
             await PartidaService.CancelarPartidaAsync(partidaActual.MesaId);
             await JSRuntime.InvokeVoidAsync("Swal.fire", "info", "La partida ha sido descartada.");
             await Task.Delay(1500);
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/", forceLoad: true);
         }
         catch (Exception ex)
         {

@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="ATMScoreBoard.Display.Views.StatBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ATMScoreBoard.Display.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="400">
+    <Border BorderBrush="Cyan" BorderThickness="5" CornerRadius="5" Padding="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>            
+            <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}" Grid.Row="0" HorizontalAlignment="Center" FontSize="24" Foreground="Gray"/>            
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Viewbox Grid.Column="0" Margin="0,20">
+                    <TextBlock Text="{Binding ValueA, RelativeSource={RelativeSource AncestorType=UserControl}}" Grid.Column="0" FontFamily="DS-Digital" FontSize="48" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="DarkGreen"/>
+                </Viewbox>
+                <Separator Grid.Column="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,0"/>
+                <Viewbox Grid.Column="2" Margin="0,20">
+                    <TextBlock Text="{Binding ValueB, RelativeSource={RelativeSource AncestorType=UserControl}}" FontFamily="DS-Digital" FontSize="48" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="DarkGreen"/>
+                </Viewbox>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

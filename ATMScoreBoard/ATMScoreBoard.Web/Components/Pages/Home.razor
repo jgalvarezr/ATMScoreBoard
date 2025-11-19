@@ -109,13 +109,13 @@
                 // Llamamos directamente al servicio centralizado
                 await PartidaService.CancelarPartidaAsync(mesaId);
 
-                await JSRuntime.InvokeVoidAsync("showToastNotification", "success", "Partida cancelada correctamente.");
-                await Task.Delay(1000);
+                await JSRuntime.InvokeVoidAsync("showToast", "success", "Partida cancelada correctamente.");
+                await Task.Delay(2000);
                 Navigation.NavigateTo("/", forceLoad: true);
             }
             catch (Exception ex)
             {
-                await JSRuntime.InvokeVoidAsync("showToastNotification", "error", $"No se pudo cancelar la partida: {ex.Message}");
+                await JSRuntime.InvokeVoidAsync("Swal_message", $"No se pudo cancelar la partida: {ex.Message}", "error");
             }
         }
     }

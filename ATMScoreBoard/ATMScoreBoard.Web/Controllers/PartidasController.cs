@@ -1,9 +1,11 @@
 ﻿using ATMScoreBoard.Shared;
 using ATMScoreBoard.Shared.Models;
 using ATMScoreBoard.Web.DTOs;
+using ATMScoreBoard.Web.Hubs;
 using ATMScoreBoard.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ATMScoreBoard.Web.Controllers
@@ -14,7 +16,6 @@ namespace ATMScoreBoard.Web.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly PartidaService _partidaService;
-
 
         public PartidasController(ApplicationDbContext context, PartidaService partidaService)
         {
@@ -72,6 +73,7 @@ namespace ATMScoreBoard.Web.Controllers
             try
             {
                 await _partidaService.RealizarAccionAsync(dto);
+                
                 return Ok(); // La acción fue exitosa
             }
             catch (Exception ex)
