@@ -1,4 +1,5 @@
-﻿using ATMScoreBoard.Display.ViewModels;
+﻿using ATMScoreBoard.Display.Services;
+using ATMScoreBoard.Display.ViewModels;
 using ATMScoreBoard.Shared.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,11 +27,17 @@ namespace ATMScoreBoard.Display
                     services.Configure<StationSettings>(hostContext.Configuration.GetSection(StationSettings.SectionName));
 
                     // Registramos nuestras ventanas, ViewModels y Servicios
+                    // 
+                    services.AddSingleton<MainWindowViewModel>(provider =>
+                        new MainWindowViewModel(provider.GetRequiredService<ApiClient>()));
+
                     services.AddSingleton<MainWindow>();
-                    services.AddSingleton<MainWindowViewModel>();
                     services.AddSingleton<TeamPanelViewModel>();
                     services.AddSingleton<PlayerStatViewModel>();
                     services.AddSingleton<SignalRService>();
+                    services.AddSingleton<ApiClient>();
+
+
                 })
                 .Build();
         }

@@ -28,8 +28,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.AddScoped<JugadorService>();
 builder.Services.AddScoped<PartidaService>();
 builder.Services.AddScoped<RankingService>();
+builder.Services.AddSingleton<ConfiguracionService>();
 
 builder.Services.AddSignalR();
 

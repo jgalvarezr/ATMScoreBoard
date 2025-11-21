@@ -22,5 +22,8 @@ namespace ATMScoreBoard.Display.ViewModels
                 
         public bool IsPareja => Jugadores.Count > 1;
 
+        [ObservableProperty]
+        private bool _isWinner;
+
     }
 }

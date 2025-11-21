@@ -1,5 +1,5 @@
 ﻿using ATMScoreBoard.Shared;
-using ATMScoreBoard.Shared.Models;
+using ATMScoreBoard.Shared.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace ATMScoreBoard.Web.Services
@@ -11,58 +11,56 @@ namespace ATMScoreBoard.Web.Services
     public class RankingService
     {
         private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
+        private readonly ConfiguracionService _configService;
 
-        public RankingService(IDbContextFactory<ApplicationDbContext> dbContextFactory)
+        public RankingService(IDbContextFactory<ApplicationDbContext> dbContextFactory, ConfiguracionService configService)
         {
             _dbContextFactory = dbContextFactory;
+            _configService = configService;
         }
 
-        public async Task<List<EstadisticaEquipoColRanking>> ObtenerRankingEquiposAsync(int partidasParaRanking, int diasParaRanking)
+        public async Task<List<EstadisticaEquipoColRanking>> ObtenerRankingEquiposAsync()
         {
+
+            var partidasParaRanking = await _configService.GetIntAsync("RankingPartidas", 50);
+            var diasParaRanking = await _configService.GetIntAsync("RankingDias", 90);
+
             using var context = _dbContextFactory.CreateDbContext();
 
             // Esta es tu consulta SQL compleja
             string sql = $@"
-                            WITH 
-                            JugadoresPorEquipoNumerados AS (
-                                SELECT 
-                                    ej.EquipoId,
-                                    j.Nombre AS NombreJugador,
-                                    ROW_NUMBER() OVER(PARTITION BY ej.EquipoId ORDER BY j.Nombre) AS JugadorNum
-                                FROM dbo.EquipoJugadores ej
-                                JOIN dbo.Jugadores j ON ej.JugadorId = j.Id
-                            ),
-                            EquiposConIntegrantesEnColumnas AS (
-                                SELECT
-                                    jpn.EquipoId,
-                                    MAX(CASE WHEN jpn.JugadorNum = 1 THEN jpn.NombreJugador END) AS JugadorA,
-                                    MAX(CASE WHEN jpn.JugadorNum = 2 THEN jpn.NombreJugador END) AS JugadorB
-                                FROM JugadoresPorEquipoNumerados jpn
-                                GROUP BY jpn.EquipoId
-                            ),
-                            RankingFinal AS (
-                                SELECT 
-                                    e.EquipoId AS Id, 
-                                    e.JugadorA,
-                                    e.JugadorB,
-                                    SUM(p.Puntos) AS PuntosRanking
-                                FROM EquiposConIntegrantesEnColumnas e
-                                INNER JOIN dbo.PuntosHistorico p ON p.EquipoId = e.EquipoId
-                                WHERE p.Orden <= {{0}} AND p.Dias < {{1}}
-                                GROUP BY e.EquipoId, e.JugadorA, e.JugadorB
-                            )
-                            SELECT 
-                                Id,
-                                JugadorA,
-                                COALESCE(JugadorB, '') AS JugadorB,
-                                PuntosRanking
-                            FROM RankingFinal
-                            ORDER BY PuntosRanking DESC;
+                            with JugadoresPorEquipoNumerados AS (
+                                        select      ej.EquipoId,
+                                                    j.Nombre as NombreJugador,
+                                                    Row_number() over(partition by ej.EquipoId order by j.Nombre) as JugadorNum
+                                        from        EquipoJugadores ej
+                                        join        Jugadores j on ej.JugadorId = j.Id
+                                    ),
+                                    EquiposConIntegrantesEnColumnas AS (
+                                        select      jpn.EquipoId,
+                                                    max(case when jpn.JugadorNum = 1 then jpn.NombreJugador end) as JugadorA,
+                                                    max(case when jpn.JugadorNum = 2 then jpn.NombreJugador end) as JugadorB
+                                        from        JugadoresPorEquipoNumerados jpn
+                                        group by    jpn.EquipoId
+                                    ),
+                                    RankingConPuntos AS (                                        
+                                        select      e.EquipoId AS Id, 
+                                                    e.JugadorA,
+                                                    e.JugadorB,
+                                                    sum(p.Puntos) as PuntosRanking
+                                        from        EquiposConIntegrantesEnColumnas e
+                                        inner join  dbo.PuntosHistorico p on p.EquipoId = e.EquipoId
+                                        where       p.Orden <= {{0}} and p.Dias < {{1}} and e.JugadorB is not null
+                                        group by    e.EquipoId, e.JugadorA, e.JugadorB 
+                                    )
+                                    select          Id,
+                                                    JugadorA,
+                                                    coalesce(JugadorB, '') as JugadorB,
+                                                    PuntosRanking,                                        
+                                                    dense_rank() over (order by PuntosRanking desc) as PosicionRanking
+                                    from            RankingConPuntos
+                                    order by        PosicionRanking asc;
                         ";
-
-            // EF Core necesita que el DTO esté registrado para poder usar FromSqlRaw sobre él
-            // La forma más fácil es añadir un DbSet<T> sin clave al DbContext.
-            // OJO: Hay que hacer un pequeño ajuste en DbContext.
 
             var ranking = await context.Set<EstadisticaEquipoColRanking>()
                 .FromSqlRaw(sql, partidasParaRanking, diasParaRanking)
@@ -71,32 +69,52 @@ namespace ATMScoreBoard.Web.Services
             return ranking;
         }
 
-        public async Task<List<EstadisticaJugadorRanking>> ObtenerRankingJugadoresAsync(int partidasParaRanking, int diasParaRanking)
+        public async Task<List<EstadisticaJugadorRanking>> ObtenerRankingJugadoresAsync()
         {
+
+            var partidasParaRanking = await _configService.GetIntAsync("RankingPartidas", 50);
+            var diasParaRanking = await _configService.GetIntAsync("RankingDias", 90);
+
             using var context = _dbContextFactory.CreateDbContext();
 
             string sql = $@"
-                            with ranking as (   select          j.Id, 
+                            with puntos as (    select          j.Id, 
                                                                 j.Nombre, 
                                                                 sum(p.Puntos) AS PuntosRanking	
                                                 from        dbo.Jugadores j
                                                 inner join  dbo.EquipoJugadores ej on ej.JugadorId = j.Id
                                                 INNER JOIN  dbo.PuntosHistorico p on p.EquipoId = ej.EquipoId
-                                                where       p.Orden <= 20 AND p.Dias < 90
-                                                group by    j.Id, j.Nombre)
-
-                            select		j.Id, 
-			                            j.Nombre,
-                                        isnull(r.PuntosRanking, 0) as PuntosRanking
-                            from		Jugadores j
-                            left join   ranking r on r.Id = j.id
-                            order by    PuntosRanking desc, j.Nombre;";
+                                                where       p.Orden <= {{0}} AND p.Dias < {{1}}
+                                                group by    j.Id, j.Nombre),
+                            jugadoresPuntos as (select		j.Id, 
+			                                                j.Nombre,
+                                                            isnull(p.PuntosRanking, 0) as PuntosRanking
+                                                from		Jugadores j
+                                                left join   puntos p on p.Id = j.id)
+                            select      id,
+                                        nombre,
+                                        PuntosRanking,
+                                        dense_rank() over (order by PuntosRanking desc) as PosicionRanking
+                            from        jugadoresPuntos 
+                            order by    PosicionRanking asc, Nombre asc;";
 
             var ranking = await context.Set<EstadisticaJugadorRanking>()
                 .FromSqlRaw(sql, partidasParaRanking, diasParaRanking)
                 .ToListAsync();
 
             return ranking;
+        }
+
+        public async Task<RankingParamsDto> ObtenerRankingParamsAsync()
+        {
+            var partidasParaRanking = await _configService.GetIntAsync("RankingPartidas", 50);
+            var diasParaRanking = await _configService.GetIntAsync("RankingDias", 90);
+            return new RankingParamsDto()
+            {
+                PartidasParaRanking = partidasParaRanking,
+                DiasParaRanking = diasParaRanking
+            };
+
         }
     }
 }

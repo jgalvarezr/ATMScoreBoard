@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +31,11 @@ namespace ATMScoreBoard.Display.Views
             set { SetValue(BorderColorProperty, value); }
         }
 
+
         public static readonly System.Windows.DependencyProperty BorderColorProperty =
-            System.Windows.DependencyProperty.Register("BorderColor", typeof(Brush), typeof(TeamPanel), new PropertyMetadata(Brushes.Gray));
+            System.Windows.DependencyProperty.Register("BorderColor",
+                typeof(Brush),
+                typeof(TeamPanel),
+                new PropertyMetadata(new SolidColorBrush(Colors.Gray)));
     }
 }

@@ -1,186 +1,179 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Fonts\DS-DIGI.TTF" />
-    <None Remove="Fonts\DS-DIGIB.TTF" />
-    <None Remove="Fonts\DS-DIGII.TTF" />
-    <None Remove="Fonts\DS-DIGIT.TTF" />
-    <None Remove="Fonts\POPPINS-BLACK.TTF" />
-    <None Remove="Fonts\POPPINS-BLACKITALIC.TTF" />
-    <None Remove="Fonts\POPPINS-BOLD.TTF" />
-    <None Remove="Fonts\POPPINS-BOLDITALIC.TTF" />
-    <None Remove="Fonts\POPPINS-EXTRABOLD.TTF" />
-    <None Remove="Fonts\POPPINS-EXTRABOLDITALIC.TTF" />
-    <None Remove="Fonts\POPPINS-EXTRALIGHT.TTF" />
-    <None Remove="Fonts\POPPINS-EXTRALIGHTITALIC.TTF" />
-    <None Remove="Fonts\POPPINS-ITALIC.TTF" />
-    <None Remove="Fonts\POPPINS-LIGHT.TTF" />
-    <None Remove="Fonts\POPPINS-LIGHTITALIC.TTF" />
-    <None Remove="Fonts\POPPINS-MEDIUM.TTF" />
-    <None Remove="Fonts\POPPINS-MEDIUMITALIC.TTF" />
-    <None Remove="Fonts\POPPINS-REGULAR.TTF" />
-    <None Remove="Fonts\POPPINS-SEMIBOLD.TTF" />
-    <None Remove="Fonts\POPPINS-SEMIBOLDITALIC.TTF" />
-    <None Remove="Fonts\POPPINS-THIN.TTF" />
-    <None Remove="Fonts\POPPINS-THINITALIC.TTF" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Fonts\DS-DIGI.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\DS-DIGIB.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\DS-DIGII.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\DS-DIGIT.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-BLACK.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-BLACKITALIC.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-BOLD.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-BOLDITALIC.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-EXTRABOLD.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-EXTRABOLDITALIC.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-EXTRALIGHT.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-EXTRALIGHTITALIC.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-ITALIC.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-LIGHT.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-LIGHTITALIC.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-MEDIUM.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-MEDIUMITALIC.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-REGULAR.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-SEMIBOLD.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-SEMIBOLDITALIC.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-THIN.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Fonts\POPPINS-THINITALIC.TTF">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\bola-00.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-01.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-02.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-03.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-04.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-05.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-06.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-07.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-08.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-09.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-10.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-11.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-12.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-13.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-14.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-    <Resource Include="Images\bola-15.png">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Resource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.22" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
-	  
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ATMScoreBoard.Shared\ATMScoreBoard.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+		<Platforms>AnyCPU;x64</Platforms>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="Fonts\DS-DIGI.TTF" />
+		<None Remove="Fonts\DS-DIGIB.TTF" />
+		<None Remove="Fonts\DS-DIGII.TTF" />
+		<None Remove="Fonts\DS-DIGIT.TTF" />
+		<None Remove="Fonts\POPPINS-BLACK.TTF" />
+		<None Remove="Fonts\POPPINS-BLACKITALIC.TTF" />
+		<None Remove="Fonts\POPPINS-BOLD.TTF" />
+		<None Remove="Fonts\POPPINS-BOLDITALIC.TTF" />
+		<None Remove="Fonts\POPPINS-EXTRABOLD.TTF" />
+		<None Remove="Fonts\POPPINS-EXTRABOLDITALIC.TTF" />
+		<None Remove="Fonts\POPPINS-EXTRALIGHT.TTF" />
+		<None Remove="Fonts\POPPINS-EXTRALIGHTITALIC.TTF" />
+		<None Remove="Fonts\POPPINS-ITALIC.TTF" />
+		<None Remove="Fonts\POPPINS-LIGHT.TTF" />
+		<None Remove="Fonts\POPPINS-LIGHTITALIC.TTF" />
+		<None Remove="Fonts\POPPINS-MEDIUM.TTF" />
+		<None Remove="Fonts\POPPINS-MEDIUMITALIC.TTF" />
+		<None Remove="Fonts\POPPINS-REGULAR.TTF" />
+		<None Remove="Fonts\POPPINS-SEMIBOLD.TTF" />
+		<None Remove="Fonts\POPPINS-SEMIBOLDITALIC.TTF" />
+		<None Remove="Fonts\POPPINS-THIN.TTF" />
+		<None Remove="Fonts\POPPINS-THINITALIC.TTF" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Fonts\DS-DIGI.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\DS-DIGIB.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\DS-DIGII.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\DS-DIGIT.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-BLACK.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-BLACKITALIC.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-BOLD.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-BOLDITALIC.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-EXTRABOLD.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-EXTRABOLDITALIC.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-EXTRALIGHT.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-EXTRALIGHTITALIC.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-ITALIC.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-LIGHT.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-LIGHTITALIC.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-MEDIUM.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-MEDIUMITALIC.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-REGULAR.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-SEMIBOLD.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-SEMIBOLDITALIC.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-THIN.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Fonts\POPPINS-THINITALIC.TTF">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Images\bola-00.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-01.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-02.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-03.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-04.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-05.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-06.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-07.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-08.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-09.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-10.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-11.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-12.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-13.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-14.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+		<Resource Include="Images\bola-15.png">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Resource>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.22" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ATMScoreBoard.Shared\ATMScoreBoard.Shared.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>

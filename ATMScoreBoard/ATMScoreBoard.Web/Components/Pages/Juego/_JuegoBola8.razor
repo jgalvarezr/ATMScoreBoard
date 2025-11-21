@@ -17,8 +17,8 @@ else
         <!-- ============================================= -->
         <!-- FASE 1: MESA ABIERTA                          -->
         <!-- ============================================= -->
-        <div id="fase-mesa-abierta" >
-            
+        <div id="fase-mesa-abierta">
+
             <!-- Controles de Asignación -->
             <div class="row justify-content-between mb-2 ">
                 <div class="col-auto ">
@@ -30,7 +30,7 @@ else
                     <h4 class="text-center text-muted mb-3">Mesa Abierta</h4>
                 </div>
                 <div class="col-auto">
-                     <button class="btn btn-success" @onclick="() => AsignarGrupos(partidaActual.EquipoBId)">
+                    <button class="btn btn-success" @onclick="() => AsignarGrupos(partidaActual.EquipoBId)">
                         Asignar Lisas a <strong>@GetNombresFromNavigation(partidaActual.EquipoB)</strong>
                     </button>
                 </div>
@@ -63,43 +63,65 @@ else
         <!-- FASE 2: MESA CERRADA (GRUPOS ASIGNADOS)       -->
         <!-- ============================================= -->
         <div id="fase-mesa-cerrada">
-            <h3 class="text-center text-muted mb-3">Mesa Cerrada</h3>
+            <h4 class="text-center text-muted mb-0">Mesa Cerrada</h4>
             <div class="row">
-                <!-- Equipo Lisas -->
                 @{
                     var equipoLisas = partidaActual.EquipoAId == partidaActual.EquipoLisasId ? partidaActual.EquipoA : partidaActual.EquipoB;
                     var equipoRayadas = partidaActual.EquipoAId != partidaActual.EquipoLisasId ? partidaActual.EquipoA : partidaActual.EquipoB;
                     var bolasDelEquipoLisas = partidaActual.EquipoAId == partidaActual.EquipoLisasId ? bolasA : bolasB;
                     var bolasDelEquipoRayadas = partidaActual.EquipoAId != partidaActual.EquipoLisasId ? bolasA : bolasB;
-                    var bolasLisasRestantes = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 0 };
-                    var bolasRayadasRestantes = new[] { 9, 10, 11, 12, 13, 14, 15, 8, 0 };
+
+                    int[] bolasEquipoA;
+                    int[] bolasEquipoB;
+
+                    if (partidaActual.EquipoAId == partidaActual.EquipoLisasId)
+                    {
+                        bolasEquipoA = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 0 };
+                        bolasEquipoB = new[] { 9, 10, 11, 12, 13, 14, 15, 8, 0 };
+                    }
+                    else
+                    {
+                        bolasEquipoA = new[] { 9, 10, 11, 12, 13, 14, 15, 8, 0 };
+                        bolasEquipoB = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 0 };
+                    }
                 }
+
+
+                <!-- Equipo Lisas -->
                 <div class="col-4 col-xxl-3">
                     <div class="flex-3-cols">
-                        @foreach (var bola in bolasLisasRestantes)
+                        @foreach (var bola in bolasEquipoA)
                         {
                             string bolaAtenuada = classBola(bola);
                             <div class="">
-                                <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(equipoLisas.Id, bola)">
+                                <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(partidaActual.EquipoAId, bola)">
                                     <img src="/images/bola-@(bola.ToString("D2")).png" class="img-fluid" />
                                 </button>
                             </div>
-                        }                        
+                        }
                     </div>
                 </div>
+                <div class="col-4 col-xxl6">
+                    <div class="d-flex flex-column align-items-center mt-4">
+                        <!-- ¡NUEVO BOTÓN! -->
+                        <button class="btn btn-sm btn-outline-warning" @onclick="DesasignarGrupos" title="Cambiar asignación de grupos">
+                            <i class="bi bi-arrow-repeat"></i> Abrir Mesa
+                        </button>
+                    </div>
 
+                </div>
                 <!-- Equipo Rayadas -->
-                <div class="col-4 offset-4  col-xxl-3 offset-xxl-6">
+                <div class="col-4 col-xxl-3 ">
                     <div class="flex-3-cols">
-                        @foreach (var bola in bolasRayadasRestantes)
+                        @foreach (var bola in bolasEquipoB)
                         {
                             string bolaAtenuada = classBola(bola);
                             <div class="">
-                                <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(equipoRayadas.Id, bola)">
+                                <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(partidaActual.EquipoBId, bola)">
                                     <img src="/images/bola-@(bola.ToString("D2")).png" class="img-fluid" />
                                 </button>
                             </div>
-                        }                       
+                        }
                     </div>
                 </div>
             </div>
@@ -159,6 +181,7 @@ else
     {
         if (partidaActual == null) return;
 
+        partidaActual.EquipoLisasId = equipoLisasId;
         var accion = new AccionJuegoDto
         {
             MesaId = partidaActual.MesaId,
@@ -180,12 +203,44 @@ else
         }
     }
 
+    private async Task DesasignarGrupos()
+    {
+        if (partidaActual == null) return;
+
+        var confirmado = await JSRuntime.InvokeAsync<bool>("Swal_confirm",
+            "¿Cambiar Asignación?",
+            "Esto volverá la mesa al estado 'Abierta' y desasignará todas las bolas embolsadas. ¿Estás seguro?",
+            "warning",
+            "Sí, ¡cambiar!");
+
+        if (confirmado)
+        {
+            var accion = new AccionJuegoDto
+            {
+                MesaId = partidaActual.MesaId,
+                TipoAccion = "DesasignarGruposBola8",
+                // No necesitamos Payload para esta acción
+            };
+
+            try
+            {
+                await PartidaService.RealizarAccionAsync(accion);
+                await OnEstadoJuegoCambiado.InvokeAsync();
+                partidaActual.EquipoLisasId = null;
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", ex.Message, "error");
+            }
+        }
+    }
+
     private String classBola(int bola)
     {
         if (!EnModoCorreccion)
             return bolasA.Contains(bola) || bolasB.Contains(bola) ? "bola-atenuada" : "";
         else
-            
+
             return bolasA.Contains(bola) || bolasB.Contains(bola) ? "" : "bola-atenuada";
 
     }

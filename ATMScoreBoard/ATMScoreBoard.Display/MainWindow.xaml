@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="ATM ScoreBoard" Height="1080" Width="1920"
         Background="#1E1E1E" Foreground="White"
-        WindowState="Maximized" WindowStyle="SingleBorderWindow" FontFamily="./Fonts/#Poppins">
+        WindowState="Maximized" WindowStyle="None" FontFamily="./Fonts/#Poppins">
 
     <Grid>
         <Grid.Resources>
@@ -17,18 +17,26 @@
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
         </Grid.Resources>
 
-        <Border Visibility="{Binding HayPartidaEnCurso, Converter={StaticResource BoolToVis}}" >
-            <Grid Margin="10">
+        <!-- ============================================= -->
+        <!--             VISTA DEL MARCADOR                -->
+        <!-- ============================================= -->
+        <Border Visibility="{Binding HayPartidaEnCurso, Converter={StaticResource BoolToVis}}">
+            <Grid Margin="20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="4*" />
-                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="2.5*" />
                     <ColumnDefinition Width="4*" />
                 </Grid.ColumnDefinitions>
 
-                <views:TeamPanel Grid.Column="0" DataContext="{Binding EquipoA}" BorderColor="Cyan"/>
+                <!-- Panel Equipo A -->
+                <views:TeamPanel Grid.Column="0" DataContext="{Binding EquipoA}">
+                    <views:TeamPanel.BorderColor>
+                        <SolidColorBrush Color="Cyan" />
+                    </views:TeamPanel.BorderColor>
+                </views:TeamPanel>
 
-
-                <Grid Grid.Column="1"  Margin="20,0">
+                <!-- Panel Central de Estadísticas -->
+                <Grid Grid.Column="1" Margin="20,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
@@ -39,16 +47,97 @@
                     <views:StatBox Grid.Row="1" Margin="0,15"      Title="PUNTOS"  ValueA="{Binding RankPuntosA}" ValueB="{Binding RankPuntosB}"/>
                     <views:StatBox Grid.Row="2" Margin="0,15"      Title="GLOBAL"  ValueA="{Binding VictoriasGlobalesA}" ValueB="{Binding VictoriasGlobalesB}"/>
                     <views:StatBox Grid.Row="3" Margin="0,15,0,15" Title="GAMES"   ValueA="{Binding VictoriasH2HA}" ValueB="{Binding VictoriasH2HB}"/>
+                </Grid>
 
-                </Grid>                    
-                
-
-                <views:TeamPanel Grid.Column="2" DataContext="{Binding EquipoB}" BorderColor="Cyan"/>
+                <!-- Panel Equipo B -->
+                <views:TeamPanel Grid.Column="2" DataContext="{Binding EquipoB}">
+                    <views:TeamPanel.BorderColor>
+                        <SolidColorBrush Color="Cyan" />
+                    </views:TeamPanel.BorderColor>
+                </views:TeamPanel>
             </Grid>
         </Border>
 
-        <Border Visibility="{Binding HayPartidaEnCurso, Converter={StaticResource InverseBoolToVis}}">
-            <TextBlock Text="Aquí se mostrarán los Rankings" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"/>
+        <!-- ============================================= -->
+        <!--            VISTA INACTIVA (RANKING)           -->
+        <!-- ============================================= -->
+        <Border Visibility="{Binding HayPartidaEnCurso, Converter={StaticResource InverseBoolToVis}}" Padding="50">
+            <Grid>
+                <Grid.Resources>
+                    <!-- Plantillas con clave (x:Key) para evitar problemas de resolución de namespace -->
+                    <DataTemplate x:Key="RankingEquiposTemplate">
+                        <views:RankingEquiposView DataContext="{Binding DataContext.RankingEquipos, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </DataTemplate>
+                    <DataTemplate x:Key="RankingJugadoresTemplate">
+                        <views:RankingJugadoresView DataContext="{Binding DataContext.RankingJugadores, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </DataTemplate>
+                </Grid.Resources>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+
+                </Grid.RowDefinitions>
+
+                <!-- Título dinámico -->
+                <TextBlock Grid.Row="0" HorizontalAlignment="Center" FontSize="48" FontWeight="Bold" Margin="0,0,0,30">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="RANKING DE EQUIPOS"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding MostrandoRankingEquipos}" Value="False">
+                                    <Setter Property="Text" Value="RANKING DE JUGADORES"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <!-- ContentControl que cambia su plantilla con Triggers -->
+                <ContentControl Grid.Row="1">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="ContentTemplate" Value="{StaticResource RankingEquiposTemplate}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding MostrandoRankingEquipos}" Value="False">
+                                    <Setter Property="ContentTemplate" Value="{StaticResource RankingJugadoresTemplate}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
+
+                <Border Grid.Row="2" 
+                        Margin="0,0,0,0" 
+                        Padding="5" 
+                        Background="#2a2e33" 
+                        CornerRadius="5"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        >
+                    <StackPanel>
+
+                        <!-- Primer TextBlock (primera línea) -->
+                        <TextBlock TextWrapping="Wrap" FontSize="16" Foreground="Gray" TextAlignment="Center">            
+                            <Run FontWeight="Bold">¿Cómo se calcula el ranking?</Run>
+                            La clasificación se determina por los puntos acumulados en el rendimiento reciente. Para el cálculo, se consideran los resultados de las últimas
+                            <Run Text="{Binding PartidasParaRanking}" FontWeight="SemiBold" Foreground="White"/>
+                            partidas, siempre que se hayan jugado en los últimos 
+                            <Run Text="{Binding DiasParaRanking}" FontWeight="SemiBold" Foreground="White"/>
+                            días.
+                        </TextBlock>
+
+                        <!-- Segundo TextBlock (segunda línea) -->
+                        <TextBlock TextWrapping="Wrap" FontSize="16" Foreground="Gray" TextAlignment="Center" Margin="0,0,0,0">             
+                            <Run FontWeight="Bold">Puntuación:</Run> 1 punto por victoria normal, 2 puntos por victoria impecable ("zapatero").
+                        </TextBlock>
+
+                    </StackPanel>
+                </Border>
+
+
+            </Grid>
         </Border>
     </Grid>
 </Window>

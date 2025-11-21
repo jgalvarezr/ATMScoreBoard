@@ -1,0 +1,84 @@
+﻿<UserControl x:Class="ATMScoreBoard.Display.Views.RankingEquiposView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ATMScoreBoard.Display.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+
+        <UserControl.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="28"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style TargetType="GridViewColumnHeader">
+                <Setter Property="FontSize" Value="28"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="Gray"/>
+            </Style>
+        </UserControl.Resources>
+
+    <Grid>
+
+        <!-- Usamos un ListView para la lista de equipos -->
+        <ListView ItemsSource="{Binding}" 
+                  Background="Transparent" 
+                  BorderThickness="0" 
+                  Foreground="White"
+                  HorizontalContentAlignment="Stretch"
+                  Margin="50,10,50,50">
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <!-- Cada fila es un Grid con 4 columnas proporcionales -->
+                    <Grid Margin="0,10">
+                        <Grid.ColumnDefinitions>
+                            <!-- Posición -->
+                            <ColumnDefinition Width="1*" />
+                            <!-- Jugador A -->
+                            <ColumnDefinition Width="4*" />
+                            <!-- Separator -->
+                            <ColumnDefinition Width="0.05*" />                            
+                            <!-- Jugador B -->
+                            <ColumnDefinition Width="4*" />
+                            <!-- Puntos -->
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Columna 1: Posición -->
+                        <Viewbox Grid.Column="0">
+                            <TextBlock Text="{Binding PosicionRanking}" FontWeight="SemiBold"  FontSize="60" Foreground="DarkCyan" Margin="0,0,20,0"/>
+                        </Viewbox>
+
+                        <!-- Columna 2: Jugador A -->
+                        <Viewbox Grid.Column="1" HorizontalAlignment="Right">
+                            <TextBlock Text="{Binding JugadorA}" FontSize="60" Foreground="LightGreen"  Margin="20,0"/>
+                        </Viewbox>
+                        <Viewbox Grid.Column="2">
+                            <TextBlock Text="-" HorizontalAlignment="center" FontSize="60" Foreground="LightGreen"  Margin="20,0"/>
+                        </Viewbox>
+                        <!-- Columna 4: Jugador B -->
+                        <Viewbox Grid.Column="3" HorizontalAlignment="Left">
+                            <TextBlock Text="{Binding JugadorB}"  FontSize="60" Foreground="LightGreen" Margin="20,0"/>
+                        </Viewbox>
+
+                        <!-- Columna 5: Puntos -->
+                        <Viewbox Grid.Column="4">
+                            <TextBlock Text="{Binding PuntosRanking}" FontSize="60" FontWeight="SemiBold" Foreground="Cyan" HorizontalAlignment="Right"/>
+                        </Viewbox>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+            <!-- Hacemos que los contenedores de los items se estiren para ocupar toda la altura -->
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+
+        </ListView>
+    </Grid>
+</UserControl>

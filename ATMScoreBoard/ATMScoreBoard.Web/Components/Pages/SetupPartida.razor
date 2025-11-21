@@ -6,7 +6,7 @@
 @using Microsoft.EntityFrameworkCore
 @using System.Net.Http.Json
 
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject NavigationManager Navigation
 @inject PartidaService PartidaService
 @inject IJSRuntime JSRuntime
@@ -176,11 +176,44 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        jugadoresDisponibles = await DbContext.Jugadores
+        using var context = DbContextFactory.CreateDbContext();
+        jugadoresDisponibles = await context.Jugadores
             .Where(j => j.IsActive)
             .OrderBy(j => j.Nombre)
             .AsNoTracking()
             .ToListAsync();
+
+        await PrecargarUltimaPartida();
+    }
+
+    private async Task PrecargarUltimaPartida()
+    {
+        var ultimaPartida = await PartidaService.ObtenerUltimaPartidaAsync();
+        if (ultimaPartida == null)
+        {
+            // No hay partidas en el historial, no hacemos nada.
+            return;
+        }
+
+        // 3. Extraer datos de la última partida
+        partidaSetup.TipoJuego = (TipoJuego)ultimaPartida.TipoJuegoId;
+
+        var jugadoresGanadores = (ultimaPartida.EquipoGanadorId == ultimaPartida.EquipoAId)
+            ? ultimaPartida.EquipoA.EquipoJugadores
+            : ultimaPartida.EquipoB.EquipoJugadores;
+
+        bool fueParejas = jugadoresGanadores.Count > 1;
+        partidaSetup.Modalidad = fueParejas ? Modalidad.Parejas : Modalidad.Individual;
+
+        // 4. Asignar ganadores al Equipo A del nuevo setup
+        if (jugadoresGanadores.Any())
+        {
+            partidaSetup.JugadorA1Id = jugadoresGanadores.ElementAt(0).JugadorId;
+            if (fueParejas && jugadoresGanadores.Count > 1)
+            {
+                partidaSetup.JugadorA2Id = jugadoresGanadores.ElementAt(1).JugadorId;
+            }
+        }
     }
 
     private async Task HandleValidSubmit()

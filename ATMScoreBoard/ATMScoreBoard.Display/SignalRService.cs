@@ -28,7 +28,7 @@ namespace ATMScoreBoard.Display
                 .WithAutomaticReconnect()
                 .Build();
 
-
+            // 1. Evento para INICIAR o ACTUALIZAR una partida
             _hubConnection.On<EstadoPartidaDto>("PartidaActualizada", (estadoPartida) =>
             {
                 Debug.WriteLine($"[SignalR] Partida Actualizada recibida!");
@@ -38,6 +38,39 @@ namespace ATMScoreBoard.Display
                     _viewModel.ActualizarEstadoPartida(estadoPartida);
                 });
             });
+
+            // 2. Evento para FINALIZAR una partida
+            _hubConnection.On("PartidaFinalizada", () =>
+            {
+                Debug.WriteLine($"[SignalR] Mensaje 'PartidaFinalizada' recibido.");
+
+                // El ViewModel tiene un método para volver al estado 'Inactivo',
+                // cargar los rankings de nuevo y activar el timer.
+                _viewModel.FinalizarPartida();
+            });
+
+            _hubConnection.On("RankingsActualizados", () =>
+            {
+                Debug.WriteLine("[SignalR] Notificación 'RankingsActualizados' recibida.");
+
+                // Llamamos al método del ViewModel que recarga los rankings
+                viewModel.CargarRankings();
+            });
+
+
+            // (Opcional) Manejar la desconexión y reconexión para depuración
+            _hubConnection.Closed += (error) =>
+            {
+                Debug.WriteLine($"[SignalR] Conexión cerrada: {error?.Message}");
+                return Task.CompletedTask;
+            };
+
+            _hubConnection.Reconnecting += (error) =>
+            {
+                Debug.WriteLine($"[SignalR] Intentando reconectar... {error?.Message}");
+                return Task.CompletedTask;
+            };
+
         }
 
         public async Task StartAsync()

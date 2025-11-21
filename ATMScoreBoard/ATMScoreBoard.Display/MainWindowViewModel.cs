@@ -1,7 +1,9 @@
-﻿using ATMScoreBoard.Shared.DTOs;
+﻿using ATMScoreBoard.Display.Services;
+using ATMScoreBoard.Shared.DTOs;
 using ATMScoreBoard.Shared.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 
@@ -9,6 +11,9 @@ namespace ATMScoreBoard.Display.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
+        private readonly ApiClient _apiClient;
+        private Timer? _rankingTimer;
+
         // --- ESTADO GENERAL ---
         [ObservableProperty]
         private bool _hayPartidaEnCurso;
@@ -34,7 +39,80 @@ namespace ATMScoreBoard.Display.ViewModels
         [ObservableProperty] private int _victoriasH2HA;
         [ObservableProperty] private int _victoriasH2HB;
 
-        // (Lógica de Rankings para el modo inactivo irá aquí después)
+        // --- COLECCIONES PARA LOS RANKINGS ---
+        public ObservableCollection<EstadisticaEquipoColRanking> RankingEquipos { get; } = new();
+        public ObservableCollection<EstadisticaJugadorRanking> RankingJugadores { get; } = new();
+
+        [ObservableProperty]
+        private int _partidasParaRanking = 10;
+
+        [ObservableProperty]
+        private int _diasParaRanking = 10;
+
+        [ObservableProperty]
+        private bool _mostrandoRankingEquipos = true;
+
+        public MainWindowViewModel(ApiClient apiClient)
+        {
+            _apiClient = apiClient;
+            // Inicializamos el temporizador, pero no lo iniciamos todavía
+            _rankingTimer = new Timer(AlternarVistaRanking, null, Timeout.Infinite, Timeout.Infinite);
+
+            // Cargamos los rankings al iniciar la aplicación
+            CargarRankings();
+        }
+
+        private void AlternarVistaRanking(object? state)
+        {
+            MostrandoRankingEquipos = !MostrandoRankingEquipos;
+        }
+
+        public async void CargarRankings()
+        {
+            var equipos = await _apiClient.GetRankingEquiposAsync();
+            var jugadores = await _apiClient.GetRankingJugadoresAsync();
+            var parametros = await _apiClient.GetRankingParamsAsync();
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                RankingEquipos.Clear();
+                if (equipos != null)
+                {
+                    equipos.ForEach(e => RankingEquipos.Add(e));
+                }
+
+                RankingJugadores.Clear();
+                if (jugadores != null)
+                {
+                    jugadores.ForEach(j => RankingJugadores.Add(j));
+                }
+
+                DiasParaRanking = parametros?.DiasParaRanking ?? 0;
+                PartidasParaRanking = parametros?.PartidasParaRanking ?? 0;
+            });
+
+            // Inicia el temporizador para que alterne cada 10 segundos
+            _rankingTimer?.Change(10000, 10000);
+        }
+
+        public void IniciarPartida(EstadoPartidaDto estadoPartida)
+        {
+            // Detenemos el temporizador del ranking cuando empieza una partida
+            _rankingTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            ActualizarEstadoPartida(estadoPartida);
+        }
+
+        public void FinalizarPartida()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                HayPartidaEnCurso = false;
+                // Al finalizar, volvemos a cargar los rankings (con los nuevos datos)
+                // y reiniciamos el temporizador.
+                CargarRankings();
+            });
+        }
+
 
         // --- MÉTODO DE ACTUALIZACIÓN ---
         public void ActualizarEstadoPartida(EstadoPartidaDto estadoPartida)
@@ -59,6 +137,20 @@ namespace ATMScoreBoard.Display.ViewModels
                 VictoriasGlobalesB = estadoPartida.EquipoB.VictoriasGlobales;
                 VictoriasH2HA = estadoPartida.EquipoA.VictoriasH2H;
                 VictoriasH2HB = estadoPartida.EquipoB.VictoriasH2H;
+
+
+
+                if (estadoPartida.Ganador != Shared.DTOs.EquipoIdentifier.Ninguno)
+                {
+                    EquipoA.IsWinner = (estadoPartida.Ganador == Shared.DTOs.EquipoIdentifier.EquipoA);
+                    EquipoB.IsWinner = (estadoPartida.Ganador == Shared.DTOs.EquipoIdentifier.EquipoB);
+                }
+                else
+                {
+                //    // Reseteamos el estado si la partida se reinicia
+                    EquipoA.IsWinner = false;
+                    EquipoB.IsWinner = false;
+                }
             });
         }
 

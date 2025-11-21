@@ -1,12 +1,14 @@
 ﻿@page "/editarjugador"
 @page "/editarjugador/{Id:int}"
 
+@using ATMScoreBoard.Web.Services
 @using ATMScoreBoard.Shared
 @using ATMScoreBoard.Shared.Models
 @using Microsoft.EntityFrameworkCore
-@inject ApplicationDbContext DbContext
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
+@inject JugadorService JugadorService
 
 <PageTitle>@(IsNew ? "Nuevo Jugador" : "Editar Jugador")</PageTitle>
 
@@ -51,40 +53,23 @@ else
         }
         else
         {
-            jugador = await DbContext.Jugadores.FindAsync(Id);
+            using var context = DbContextFactory.CreateDbContext();
+            jugador = await context.Jugadores.FindAsync(Id);
         }
     }
 
     private async Task GuardarJugador()
     {
+        if (jugador == null) return;
+
         try
         {
-            // Verificamos si el nombre ya existe (lógica de unicidad)
-            var nombreNormalizado = jugador?.Nombre?.Trim().ToLower() ?? string.Empty;
-            var existe = await DbContext.Jugadores.AnyAsync(j => j.Nombre.ToLower() == nombreNormalizado && j.Id != jugador!.Id);
-
-            if (existe)
-            {
-                await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", "Este nombre de jugador ya está en uso.", "error");
-                return;
-            }
-
-            if (IsNew)
-            {
-                DbContext.Jugadores.Add(jugador!);
-            }
-            else
-            {
-                DbContext.Jugadores.Update(jugador!);
-            }
-
-            await DbContext.SaveChangesAsync();
+            await JugadorService.GuardarJugadorAsync(jugador);
             Navigation.NavigateTo("/gestionjugadores");
         }
         catch (Exception ex)
         {
-            // Manejar otros posibles errores de guardado
-            errorMessage = $"Error al guardar: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Error al guardar", ex.Message, "error");
         }
     }
 

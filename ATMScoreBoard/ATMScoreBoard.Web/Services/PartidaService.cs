@@ -66,6 +66,19 @@ namespace ATMScoreBoard.Web.Services
             return partidaActual;
         }
 
+        public async Task<Partida?> ObtenerUltimaPartidaAsync()
+        {
+            using var context = _dbContextFactory.CreateDbContext();
+
+            // Ordena las partidas por ID descendente y toma la primera.
+            // Incluimos la información de los equipos y jugadores para no tener que hacer más consultas.
+            return await context.Partidas
+                .Include(p => p.EquipoA).ThenInclude(e => e.EquipoJugadores)
+                .Include(p => p.EquipoB).ThenInclude(e => e.EquipoJugadores)
+                .OrderByDescending(p => p.Id)
+                .FirstOrDefaultAsync();
+        }
+
         private async Task<int> ObtenerOcrearEquipoIdAsync(List<int> jugadorIds)
         {
 
@@ -185,6 +198,26 @@ namespace ATMScoreBoard.Web.Services
                     }
                     await context.SaveChangesAsync();
                     break;
+                case "DesasignarGruposBola8":
+                    // Esta acción no necesita payload, solo el MesaId del DTO principal.
+
+                    // Ponemos el EquipoLisasId de nuevo a null
+                    partidaActual.EquipoLisasId = null;
+                    context.PartidasActuales.Update(partidaActual);
+
+                    // IMPORTANTE: También debemos poner a null el EquipoId de todas las bolas
+                    // que fueron asignadas retroactivamente.
+                    var bolasAsignadas = await context.PartidasActualesBolas
+                        .Where(b => b.MesaId == dto.MesaId && b.EquipoId != null)
+                        .ToListAsync();
+
+                    foreach (var bola in bolasAsignadas)
+                    {
+                        bola.EquipoId = null;
+                    }
+
+                    await context.SaveChangesAsync();
+                    break;
                 default:
                     throw new Exception("Tipo de acción no reconocido.");
             }
@@ -225,7 +258,7 @@ namespace ATMScoreBoard.Web.Services
             var equiposIds = new List<int> { partidaActual.EquipoAId, partidaActual.EquipoBId };
             await LimpiezaEquipo(equiposIds);
 
-            await _hubContext.Clients.Group($"Mesa_{dto.MesaId}").SendAsync("PartidaFinalizada");
+            await NotificarFinalizarPartido(dto.MesaId);
 
         }
 
@@ -455,17 +488,18 @@ namespace ATMScoreBoard.Web.Services
             return resultado;
         }
 
-
         public async Task NotificarCambioDeEstado(int mesaId)
         {
             // Construimos el DTO con el estado más reciente
             var estadoDto = await ConstruirEstadoPartidaDtoAsync(mesaId);
             await _hubContext.Clients.Group($"Mesa_{mesaId}").SendAsync("PartidaActualizada", estadoDto);
         }
-
-        // Método que construye el DTO (reemplaza al que teníamos en el controlador)
-        // En Services/PartidaService.cs
-
+        
+        public async Task NotificarFinalizarPartido(int mesaId)
+        {
+            await _hubContext.Clients.Group($"Mesa_{mesaId}").SendAsync("PartidaFinalizada");
+        }
+        
         public async Task<EstadoPartidaDto?> ConstruirEstadoPartidaDtoAsync(int mesaId)
         {
             using var context = _dbContextFactory.CreateDbContext();
@@ -484,8 +518,8 @@ namespace ATMScoreBoard.Web.Services
             if (partida == null) return null;
 
             // --- 1. Cargar Datos Base (Rankings, Victorias, etc.) en paralelo ---
-            var rankingJugadores = await _rankingService.ObtenerRankingJugadoresAsync(20, 90);
-            var rankingEquipos = await _rankingService.ObtenerRankingEquiposAsync(20, 90);
+            var rankingJugadores = await _rankingService.ObtenerRankingJugadoresAsync();
+            var rankingEquipos = await _rankingService.ObtenerRankingEquiposAsync();
             var partidasHistoricas = await context.Partidas.AsNoTracking().ToListAsync();
             var bolas = await context.PartidasActualesBolas.Where(b => b.MesaId == mesaId).AsNoTracking().ToListAsync();
 

@@ -1,4 +1,5 @@
-﻿using ATMScoreBoard.Shared.Models;
+﻿using ATMScoreBoard.Shared.DTOs;
+using ATMScoreBoard.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ATMScoreBoard.Shared
@@ -15,10 +16,10 @@ namespace ATMScoreBoard.Shared
         public DbSet<Partida> Partidas { get; set; }
         public DbSet<PartidaActual> PartidasActuales { get; set; }
         public DbSet<PartidaActualBolas> PartidasActualesBolas { get; set; }
-
         public DbSet<PuntosHistoricoView> PuntosHistorico { get; set; }
         public DbSet<EstadisticaEquipoColRanking> RankingEquipos { get; set; }
         public DbSet<EstadisticaJugadorRanking> RankingJugadores { get; set; }
+        public DbSet<Configuracion> Configuraciones { get; set; }
 
 
 
@@ -59,6 +60,19 @@ namespace ATMScoreBoard.Shared
                 .WithMany() // Un equipo puede estar en muchas PartidasActuales como EquipoB
                 .HasForeignKey(pa => pa.EquipoBId)
                 .OnDelete(DeleteBehavior.Restrict); // ¡LA CLAVE! Impide el borrado en cascada.
+
+            modelBuilder.Entity<Partida>()
+               .HasOne(p => p.EquipoA)
+               .WithMany()
+               .HasForeignKey(p => p.EquipoAId)
+               .OnDelete(DeleteBehavior.Restrict); // ¡LA CLAVE!
+
+            modelBuilder.Entity<Partida>()
+                .HasOne(p => p.EquipoB)
+                .WithMany()
+                .HasForeignKey(p => p.EquipoBId)
+                .OnDelete(DeleteBehavior.Restrict); // ¡LA CLAVE!
+
 
             modelBuilder.Entity<PuntosHistoricoView>(eb =>
             {

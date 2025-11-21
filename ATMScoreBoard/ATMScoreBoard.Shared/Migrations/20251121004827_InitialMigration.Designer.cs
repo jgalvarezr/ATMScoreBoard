@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ATMScoreBoard.Shared.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251118195344_AddBola8SchemaChanges")]
-    partial class AddBola8SchemaChanges
+    [Migration("20251121004827_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,59 @@ namespace ATMScoreBoard.Shared.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("ATMScoreBoard.Shared.DTOs.EstadisticaEquipoColRanking", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("JugadorA")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JugadorB")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("PosicionRanking")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("PuntosRanking")
+                        .HasColumnType("int");
+
+                    b.ToTable("RankingEquipos");
+                });
+
+            modelBuilder.Entity("ATMScoreBoard.Shared.DTOs.EstadisticaJugadorRanking", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("PosicionRanking")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("PuntosRanking")
+                        .HasColumnType("int");
+
+                    b.ToTable("RankingJugadores");
+                });
+
+            modelBuilder.Entity("ATMScoreBoard.Shared.Models.Configuracion", b =>
+                {
+                    b.Property<string>("Clave")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Valor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Clave");
+
+                    b.ToTable("Configuraciones");
+                });
 
             modelBuilder.Entity("ATMScoreBoard.Shared.Models.Equipo", b =>
                 {
@@ -54,38 +107,6 @@ namespace ATMScoreBoard.Shared.Migrations
                     b.HasIndex("JugadorId");
 
                     b.ToTable("EquipoJugadores");
-                });
-
-            modelBuilder.Entity("ATMScoreBoard.Shared.Models.EstadisticaEquipoColRanking", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("JugadorA")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("JugadorB")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PuntosRanking")
-                        .HasColumnType("int");
-
-                    b.ToTable("RankingEquipos");
-                });
-
-            modelBuilder.Entity("ATMScoreBoard.Shared.Models.EstadisticaJugadorRanking", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PuntosRanking")
-                        .HasColumnType("int");
-
-                    b.ToTable("RankingJugadores");
                 });
 
             modelBuilder.Entity("ATMScoreBoard.Shared.Models.Jugador", b =>
@@ -159,10 +180,17 @@ namespace ATMScoreBoard.Shared.Migrations
                     b.Property<bool>("FueVictoriaImpecable")
                         .HasColumnType("bit");
 
+                    b.Property<int>("TipoJuego")
+                        .HasColumnType("int");
+
                     b.Property<int>("TipoJuegoId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EquipoAId");
+
+                    b.HasIndex("EquipoBId");
 
                     b.ToTable("Partidas");
                 });
@@ -270,6 +298,25 @@ namespace ATMScoreBoard.Shared.Migrations
                     b.Navigation("Equipo");
 
                     b.Navigation("Jugador");
+                });
+
+            modelBuilder.Entity("ATMScoreBoard.Shared.Models.Partida", b =>
+                {
+                    b.HasOne("ATMScoreBoard.Shared.Models.Equipo", "EquipoA")
+                        .WithMany()
+                        .HasForeignKey("EquipoAId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ATMScoreBoard.Shared.Models.Equipo", "EquipoB")
+                        .WithMany()
+                        .HasForeignKey("EquipoBId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EquipoA");
+
+                    b.Navigation("EquipoB");
                 });
 
             modelBuilder.Entity("ATMScoreBoard.Shared.Models.PartidaActual", b =>
