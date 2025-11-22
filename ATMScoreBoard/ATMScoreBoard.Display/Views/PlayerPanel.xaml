@@ -8,56 +8,98 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              x:Name="self">
-    <Border BorderBrush="Orange" BorderThickness="4" CornerRadius="5" Padding="10">
+    <Border BorderBrush="LightSteelBlue" BorderThickness="4" CornerRadius="20" Padding="10" Background="DarkBlue">
         <Grid>
 
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="8*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="4*"/>                
+                <ColumnDefinition Width="1*"/>                
+                <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <Viewbox Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left"  >
+            <Viewbox Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5 10 5 0" >
                 <TextBlock Text="{Binding ElementName=self, Path=Nombre}"                                 
-                           Foreground="White"
-                           TextTrimming="CharacterEllipsis"/>
+                           Foreground="#DEF"
+                           TextTrimming="CharacterEllipsis">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="#002"          
+                                          ShadowDepth="1"        
+                                          BlurRadius="1"         
+                                          Opacity="0.9"          
+                                          RenderingBias="Quality"/>
+                    </TextBlock.Effect>                    
+                </TextBlock>
             </Viewbox>
-            
-            <Separator Grid.Column="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="0"/>
+                        
 
-            <Viewbox Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" >
+            <Viewbox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0 5 3" >
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                    <TextBlock Text="Posicion" 
-                               FontSize="14"  
-                               Foreground="Gray" 
-                               HorizontalAlignment="Center"/>
+                    <TextBlock Text=" Ranking " 
+                               FontSize="8"  
+                               Foreground="LightSteelBlue" 
+                               HorizontalAlignment="Center" 
+                               Margin="5 0 5 0 "/>
+                    <Border Background="#DEF" CornerRadius="5"  >
+                        <Border.Effect>
+                            <DropShadowEffect ShadowDepth="2"
+                                              Color="#002"
+                                              BlurRadius="1"
+                                              Opacity=".9"
+                                              RenderingBias="Quality">
+                                
+                            </DropShadowEffect>
+                        </Border.Effect>
+                        <TextBlock Text="{Binding PosicionRanking}" 
+                                   FontFamily="DS-Digital"
+                                   FontSize="32" 
+                                   Foreground="DarkBlue"
+                                   HorizontalAlignment="Center">
 
-                    <TextBlock Text="{Binding PosicionRanking}" 
-                               FontFamily="DS-Digital"
-                               FontSize="32" 
-                               Foreground="Cyan"
-                               HorizontalAlignment="Center"/>
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="DarkBlue"          
+                                                  ShadowDepth="1"        
+                                                  BlurRadius="2"         
+                                                  Opacity="0.5"          
+                                                  RenderingBias="Quality"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </Border>
                 </StackPanel>
             </Viewbox>
 
-            <Separator Grid.Column="3" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="0"/>
-            
-            <Viewbox Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Center" >
+            <Viewbox Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0 5 3" >
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                    <TextBlock Text="Posicion" 
-                               FontSize="12"  
-                               Foreground="Gray" 
-                               HorizontalAlignment="Center"/>
+                    <TextBlock Text=" Puntos " 
+                   FontSize="8"  
+                   Foreground="LightSteelBlue" 
+                   HorizontalAlignment="Center" 
+                   Margin="8 0 8 0 "/>
+                    <Border Background="#DEF" CornerRadius="5"  >
+                        <Border.Effect>
+                            <DropShadowEffect ShadowDepth="2"
+                                  Color="#002"
+                                  BlurRadius="1"
+                                  Opacity=".9"
+                                  RenderingBias="Quality">
 
+                            </DropShadowEffect>
+                        </Border.Effect>
+                        <TextBlock Text="{Binding PuntosRanking}" 
+                       FontFamily="DS-Digital"
+                       FontSize="32" 
+                       Foreground="DarkBlue"
+                       HorizontalAlignment="Center">
 
-                    <TextBlock Text="{Binding PuntosRanking}" 
-                               FontFamily="DS-Digital"                    
-                               FontSize="32" 
-                               Foreground="Cyan"
-                               HorizontalAlignment="Center"/>
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="DarkBlue"          
+                                      ShadowDepth="1"        
+                                      BlurRadius="2"         
+                                      Opacity="0.5"          
+                                      RenderingBias="Quality"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </Border>
                 </StackPanel>
             </Viewbox>
         </Grid>

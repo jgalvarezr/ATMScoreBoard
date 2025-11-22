@@ -79,14 +79,14 @@
                                Nombre="{Binding Nombre}" 
                                PosicionRanking="{Binding PosicionRanking}" 
                                PuntosRanking="{Binding PuntosRanking}" 
-                               Margin="0,5" />
+                               Margin="0,15 0 5" />
 
                 <views:PlayerPanel Grid.Row="1" Visibility="{Binding IsPareja, Converter={StaticResource BoolToVis}}"
                                DataContext="{Binding Jugadores[1]}" 
                                Nombre="{Binding Nombre}" 
                                PosicionRanking="{Binding PosicionRanking}" 
                                PuntosRanking="{Binding PuntosRanking}" 
-                               Margin="0,5" />
+                               Margin="0 5 0 15" />
 
 
                 <!-- PUNTUACIÓN PRINCIPAL -->
@@ -102,8 +102,8 @@
                             <DropShadowEffect 
                             Color="Orange"          
                             ShadowDepth="0"        
-                            BlurRadius="10"         
-                            Opacity="0.9"          
+                            BlurRadius="4"         
+                            Opacity="0.6"          
                             RenderingBias="Quality"/>
                         </TextBlock.Effect>
 
@@ -133,10 +133,10 @@
                                    Margin="2">
                                     <Image.Effect>
                                         <DropShadowEffect 
-                                        Color="LightGray"          
-                                        ShadowDepth="0"        
-                                        BlurRadius="01"         
-                                        Opacity="1"          
+                                        Color="Black"          
+                                        ShadowDepth="10"        
+                                        BlurRadius="8"         
+                                        Opacity="0.7"          
                                         RenderingBias="Quality"/>
                                     </Image.Effect>
 

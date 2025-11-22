@@ -6,26 +6,76 @@
              xmlns:local="clr-namespace:ATMScoreBoard.Display.Views"
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="400">
-    <Border BorderBrush="Cyan" BorderThickness="5" CornerRadius="5" Padding="10">
+    <Border BorderBrush="#AFA" BorderThickness="5" CornerRadius="20" Padding="10" Background="DarkGreen">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>            
-            <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}" Grid.Row="0" HorizontalAlignment="Center" FontSize="24" Foreground="Gray"/>            
+            <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                       Grid.Row="0" 
+                       HorizontalAlignment="Center" 
+                       FontSize="24" 
+                       Foreground="LightGreen" Margin="0"/>            
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>                
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Viewbox Grid.Column="0" Margin="0,20">
-                    <TextBlock Text="{Binding ValueA, RelativeSource={RelativeSource AncestorType=UserControl}}" Grid.Column="0" FontFamily="DS-Digital" FontSize="48" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="DarkGreen"/>
-                </Viewbox>
-                <Separator Grid.Column="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,0"/>
-                <Viewbox Grid.Column="2" Margin="0,20">
-                    <TextBlock Text="{Binding ValueB, RelativeSource={RelativeSource AncestorType=UserControl}}" FontFamily="DS-Digital" FontSize="48" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="DarkGreen"/>
-                </Viewbox>
+
+                <Border Grid.Column="0" Background="#DEF" BorderBrush="DarkGreen" BorderThickness="2" CornerRadius="20" Margin="30" >
+                    <Border.Effect>
+                        <DropShadowEffect ShadowDepth="10"
+                                          Color="#020"
+                                          BlurRadius="5"
+                                          Opacity=".3"
+                                          RenderingBias="Quality">
+                        </DropShadowEffect>
+                    </Border.Effect>
+                    <Viewbox Margin="0 0 0 0">
+                        <TextBlock Text="{Binding ValueA, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                   FontFamily="DS-Digital"
+                                   FontSize="32" 
+                                   Foreground="#040"
+                                   HorizontalAlignment="Center">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="DarkGreen"          
+                                                  ShadowDepth="1"        
+                                                  BlurRadius="1"         
+                                                  Opacity="0.5"          
+                                                  RenderingBias="Quality"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </Viewbox>
+                </Border>
+
+                <Border Grid.Column="1" Background="#DEF" BorderBrush="DarkGreen" BorderThickness="2" CornerRadius="20" Margin="30" >
+                    <Border.Effect>
+                        <DropShadowEffect ShadowDepth="10"
+                                          Color="#020"
+                                          BlurRadius="5"
+                                          Opacity=".3"
+                                          RenderingBias="Quality">
+                        </DropShadowEffect>
+                    </Border.Effect>
+                    <Viewbox Margin="0 0 0 0">
+                        <TextBlock Text="{Binding ValueB, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                   FontFamily="DS-Digital"
+                                   FontSize="32" 
+                                   Foreground="#040"
+                                   HorizontalAlignment="Center">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="DarkGreen"          
+                                                  ShadowDepth="1"        
+                                                  BlurRadius="1"         
+                                                  Opacity="0.5"          
+                                                  RenderingBias="Quality"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                    </Viewbox>
+                </Border>
+
+
             </Grid>
         </Grid>
     </Border>

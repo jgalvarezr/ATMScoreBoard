@@ -30,6 +30,7 @@
 		<None Remove="Fonts\POPPINS-SEMIBOLDITALIC.TTF" />
 		<None Remove="Fonts\POPPINS-THIN.TTF" />
 		<None Remove="Fonts\POPPINS-THINITALIC.TTF" />
+		<None Remove="Images\background.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Resource Include="Fonts\DS-DIGI.TTF">
@@ -98,6 +99,7 @@
 		<Resource Include="Fonts\POPPINS-THINITALIC.TTF">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Resource>
+		<Resource Include="Images\background.png" />
 		<Resource Include="Images\bola-00.png">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
