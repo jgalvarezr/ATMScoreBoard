@@ -17,7 +17,7 @@
 
     <Border x:Name="OuterBorder" 
             BorderBrush="{Binding BorderColor, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue=Gray}" 
-            BorderThickness="0" CornerRadius="5">
+            BorderThickness="0" CornerRadius="20" Margin="10" Padding="10">
 
         <Border x:Name="InnerBorder" 
                 BorderBrush="{Binding BorderColor, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue=Gray}" 
@@ -36,11 +36,11 @@
                                     <Storyboard>
                                         <!-- Animamos la opacidad del borde de resplandor -->
                                         <ColorAnimation Storyboard.TargetProperty="Background.Color"
-                                                      From="#1E1E1E"          
-                                                      To="DarkMagenta"      
-                                                      Duration="0:0:1"     
-                                                      AutoReverse="True"
-                                                      RepeatBehavior="Forever"/>
+                                                        From="#1E1E1E"          
+                                                        To="DarkMagenta"      
+                                                        Duration="0:0:1"     
+                                                        AutoReverse="True"
+                                                        RepeatBehavior="Forever"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </DataTrigger.EnterActions>
@@ -66,32 +66,43 @@
                 </Grid.Resources>
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="1.5*"/>
-                    <RowDefinition Height="1.5*"/>
+                    <RowDefinition Height="3*"/>
                     <RowDefinition Height="6*"/>
                     <RowDefinition Height="3*"/>
                 </Grid.RowDefinitions>
 
                 <!-- LISTA DE JUGADORES -->
+                <Border x:Name="PlayersBorder" Grid.Row="0"
+                        BorderBrush="{Binding BorderColor, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue=Gray}"                         
+                        BorderThickness="5" CornerRadius="35" Margin="0" Padding="15 0 15 0 ">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            
+                        </Grid.RowDefinitions>
 
-                <views:PlayerPanel Grid.Row="0"
+                        <views:PlayerPanel Grid.Row="0"
                                DataContext="{Binding Jugadores[0]}" 
                                Nombre="{Binding Nombre}" 
                                PosicionRanking="{Binding PosicionRanking}" 
                                PuntosRanking="{Binding PuntosRanking}" 
                                Margin="0,15 0 5" />
 
-                <views:PlayerPanel Grid.Row="1" Visibility="{Binding IsPareja, Converter={StaticResource BoolToVis}}"
+                        <views:PlayerPanel  Grid.Row="1"
+                            Visibility="{Binding IsPareja, Converter={StaticResource BoolToVis}}"
                                DataContext="{Binding Jugadores[1]}" 
                                Nombre="{Binding Nombre}" 
                                PosicionRanking="{Binding PosicionRanking}" 
                                PuntosRanking="{Binding PuntosRanking}" 
                                Margin="0 5 0 15" />
+                    </Grid>
 
+                </Border>
 
                 <!-- PUNTUACIÓN PRINCIPAL -->
 
-                <Viewbox Grid.Row="2">
+                <Viewbox Grid.Row="1">
                     <TextBlock Text="{Binding Puntuacion}" 
                            FontFamily="DS-Digital" 
                            FontSize="250" 
@@ -112,7 +123,7 @@
 
 
                 <!-- BOLAS EMBOLSADAS -->
-                <Grid Grid.Row="3">
+                <Grid Grid.Row="2">
                     <ItemsControl ItemsSource="{Binding BolasEmbolsadas}" 
                                   HorizontalAlignment="Center" 
                                   VerticalAlignment="Center">

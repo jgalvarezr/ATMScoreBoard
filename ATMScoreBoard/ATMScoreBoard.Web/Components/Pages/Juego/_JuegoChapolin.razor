@@ -16,24 +16,39 @@
                 @for (int i = 1; i <= 16; i++)
                 {
                     int bola = (i > 15) ? 0 : i;
-                    string bolaAtenuada = classBola(bola);
-                    <div class="">
-                        <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(partidaActual.EquipoAId, bola)">
+                    string cssClass = classBola(bola);
+                    bool isDisabled = cssClass == "bola-atenuada";
+
+                    <div>
+                        <button class="btn btn-dark p-0 btn-bola @cssClass"
+                                disabled="@isDisabled"
+                                @onclick="() => AnotarBola(equipoIdL, bola)">
                             <img src="/images/bola-@(bola.ToString("D2")).png" class="img-fluid" />
                         </button>
                     </div>
                 }
             </div>
         </div>
+
+        <div class="col-4 col-xxl-6 text-center">
+            <button class="btn btn-outline-secondary btn-sm" @onclick="IntercambiarLados">
+                <i class="bi bi-arrow-left-right"></i> Intercambiar Bandas
+            </button>
+        </div>
+
         <!-- Botones Equipo B -->
-        <div class="col-4 offset-4  col-xxl-3 offset-xxl-6">
+        <div class="col-4 col-xxl-3">
             <div class=" flex-5-cols ">
                 @for (int i = 1; i <= 16; i++)
                 {
                     int bola = (i > 15) ? 0 : i;
-                    string bolaAtenuada = classBola(bola);
+                    string cssClass = classBola(bola);
+                    bool isDisabled = cssClass == "bola-atenuada";
+
                     <div>
-                        <button class="btn btn-dark p-0 btn-bola @(bolaAtenuada)" @onclick="() => AnotarBola(partidaActual.EquipoBId, bola)">
+                        <button class="btn btn-dark p-0 btn-bola @cssClass"
+                                disabled="@isDisabled"
+                                @onclick="() => AnotarBola(equipoIdR, bola)">
                             <img src="/images/bola-@(bola.ToString("D2")).png" class="img-fluid" />
                         </button>
                     </div>
@@ -52,12 +67,58 @@
     [Parameter] public List<int> bolasB { get; set; } = new();
     [Parameter] public bool EnModoCorreccion { get; set; }
 
+    private int equipoIdL;
+    private int equipoIdR;
 
-    private string GetNombresFromNavigation(Equipo equipo)
+    protected override void OnParametersSet()
     {
-        var nombres = equipo.EquipoJugadores.Select(ej => ej.Jugador.Nombre).ToList();
-        return string.Join(" y ", nombres);
+        if (partidaActual != null)
+        {
+            // LÓGICA:
+            // Izquierda (L) = Banda Roja
+            // Derecha (R) = Banda Blanca
+
+            // Si BandaEquipoA es "Roja", A está en la Izquierda (L).
+            bool equipoA_EsRoja = string.IsNullOrEmpty(partidaActual.BandaEquipoA) || partidaActual.BandaEquipoA == "Roja";
+
+            if (equipoA_EsRoja)
+            {
+                // CASO 1: A es Izquierda (L), B es Derecha (R)
+                equipoIdL = partidaActual.EquipoAId;               
+                equipoIdR = partidaActual.EquipoBId;                
+            }
+            else
+            {
+                // CASO 2: A es Derecha (R), B es Izquierda (L)
+                equipoIdL = partidaActual.EquipoBId;                
+                equipoIdR = partidaActual.EquipoAId;                
+            }
+        }
     }
+
+    private async Task IntercambiarLados()
+    {
+        if (partidaActual == null) return;
+
+        var accion = new AccionJuegoDto
+        {
+            MesaId = partidaActual.MesaId,
+            TipoAccion = "IntercambiarBandas", // Esta acción ya la creamos en el servicio
+            Payload = default
+        };
+
+        try
+        {
+            await PartidaService.RealizarAccionAsync(accion);
+            await OnEstadoJuegoCambiado.InvokeAsync();
+            
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("Swal.fire", "Error", ex.Message, "error");
+        }
+    }
+
 
     private async Task AnotarBola(int equipoId, int numeroBola)
     {

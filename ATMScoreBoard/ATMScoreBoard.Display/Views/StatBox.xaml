@@ -4,8 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ATMScoreBoard.Display.Views"
+             x:Name="root"
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="400">
+    
     <Border BorderBrush="#AFA" BorderThickness="5" CornerRadius="20" Padding="10" Background="DarkGreen">
         <Grid>
             <Grid.RowDefinitions>
@@ -18,12 +20,38 @@
                        FontSize="24" 
                        Foreground="LightGreen" Margin="0"/>            
             <Grid Grid.Row="1">
+
+                <Grid.Resources>
+                    <!-- ESTILOS PARA INTERCAMBIAR COLUMNAS -->
+
+                    <!-- Estilo para el Valor A (Izquierda -> Derecha) -->
+                    <Style x:Key="ValueAStyle" TargetType="Border">
+                        <Setter Property="Grid.Column" Value="0"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSwapped, ElementName=root}" Value="True">
+                                <Setter Property="Grid.Column" Value="1"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+
+                    <!-- Estilo para el Valor B (Derecha -> Izquierda) -->
+                    <Style x:Key="ValueBStyle" TargetType="Border">
+                        <Setter Property="Grid.Column" Value="1"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSwapped, ElementName=root}" Value="True">
+                                <Setter Property="Grid.Column" Value="0"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Resources>
+
+
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>                
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Background="#DEF" BorderBrush="DarkGreen" BorderThickness="2" CornerRadius="20" Margin="30" >
+                <Border Style="{StaticResource ValueAStyle}" Background="#DEF" BorderBrush="DarkGreen" BorderThickness="2" CornerRadius="20" Margin="30" >
                     <Border.Effect>
                         <DropShadowEffect ShadowDepth="10"
                                           Color="#020"
@@ -49,7 +77,7 @@
                     </Viewbox>
                 </Border>
 
-                <Border Grid.Column="1" Background="#DEF" BorderBrush="DarkGreen" BorderThickness="2" CornerRadius="20" Margin="30" >
+                <Border Style="{StaticResource ValueBStyle}" Background="#DEF" BorderBrush="DarkGreen" BorderThickness="2" CornerRadius="20" Margin="30" >
                     <Border.Effect>
                         <DropShadowEffect ShadowDepth="10"
                                           Color="#020"

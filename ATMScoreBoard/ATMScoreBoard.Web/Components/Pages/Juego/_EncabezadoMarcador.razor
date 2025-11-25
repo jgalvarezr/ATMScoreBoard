@@ -13,10 +13,12 @@
 }
 else
 {
+    
+        
     <div class="row my-2">
         <div class="col-6">
             <div class="d-flex justify-content-start flex-wrap gap-1 mb-0" style="min-height: 32px;">
-                @foreach (var bolaNum in bolasA.OrderBy(b => b))
+                @foreach (var bolaNum in bolasL.OrderBy(b => b))
                 {
                     <img src="/images/bola-@(bolaNum.ToString("D2")).png" style="width: 30px; height: 30px;" alt="Bola @bolaNum" />
                 }
@@ -24,25 +26,26 @@ else
         </div>
         <div class="col-6">
             <div class="d-flex justify-content-end flex-wrap gap-1 mb-0" style="min-height: 32px;">
-                @foreach (var bolaNum in bolasB.OrderBy(b => b))
+                @foreach (var bolaNum in bolasR.OrderBy(b => b))
                 {
                     <img src="/images/bola-@(bolaNum.ToString("D2")).png" style="width: 30px; height: 30px;" alt="Bola @bolaNum" />
                 }
             </div>
         </div>
     </div>
+    
 
     <div class="row text-center mb-3 mt-1">
         <!-- Columna Equipo A -->
         <div class="col-5">
-            <div class="row border border-1 rounded-2 border-secondary pt-2 @(Ganador == EquipoIdentifier.EquipoA ? "highlight-winner" : "")">
+            <div class="row border border-5 rounded-3 border-danger pt-2 @(GanadorL ? "highlight-winner" : "")">
                 <div class="col-7 text-start">
                     <div class="text-warning fs-4">
-                        @( (MarkupString)nombreEquipoA )
+                        @( (MarkupString)nombreEquipoL )
                     </div>
                 </div>
                 <div class="col-5 text-center">
-                    <h2 class="display-3 fw-bold">@puntuacionA</h2>
+                    <h2 class="display-3 fw-bold">@puntuacionL</h2>
                 </div>
             </div>
         </div>
@@ -55,13 +58,13 @@ else
 
         <!-- Columna Equipo B -->
         <div class="col-5">
-            <div class="row border border-1 rounded-2 border-secondary pt-2 @(Ganador == EquipoIdentifier.EquipoB ? "highlight-winner" : "")">
+            <div class="row border border-5 rounded-3 border-light pt-2 @(GanadorR ? "highlight-winner" : "")">
                 <div class="col-5 text-center">
-                    <h2 class="display-3 fw-bold">@puntuacionB</h2>
+                    <h2 class="display-3 fw-bold">@puntuacionR</h2>
                 </div>
                 <div class="col-7 text-end">
                     <div class="text-warning fs-4">
-                       @( (MarkupString)nombreEquipoB )
+                       @( (MarkupString)nombreEquipoR )
                     </div>
                 </div>
             </div>
@@ -85,12 +88,50 @@ else
 
     private bool isLoading = true;
 
+    private List<int> bolasL = new();
+    private List<int> bolasR = new();
+    private int puntuacionL;
+    private int puntuacionR;
+    private string nombreEquipoL = string.Empty;
+    private string nombreEquipoR = string.Empty;
+    private bool GanadorL;
+    private bool GanadorR;
+
+
     // Propiedades para mostrar en la UI
+
 
 
     protected override void OnParametersSet()
     {
         isLoading = false;
+
+        if (partidaActual != null)
+        {            
+            if (string.IsNullOrEmpty(partidaActual.BandaEquipoA) || partidaActual.BandaEquipoA == "Roja"){
+                bolasL = bolasA;
+                puntuacionL = puntuacionA;
+                nombreEquipoL = nombreEquipoA;
+                GanadorL = (Ganador == EquipoIdentifier.EquipoA);                
+
+                bolasR = bolasB;
+                puntuacionR = puntuacionB;
+                nombreEquipoR = nombreEquipoB;
+                GanadorR = (Ganador == EquipoIdentifier.EquipoB);
+            } else
+            {
+                bolasL = bolasB;
+                puntuacionL = puntuacionB;
+                nombreEquipoL = nombreEquipoB;
+                GanadorL = (Ganador == EquipoIdentifier.EquipoB);
+
+                bolasR = bolasA;
+                puntuacionR = puntuacionA;
+                nombreEquipoR = nombreEquipoA;
+                GanadorR = (Ganador == EquipoIdentifier.EquipoA);
+            }
+        }
+
     }
 
     

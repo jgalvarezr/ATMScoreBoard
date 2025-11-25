@@ -98,18 +98,20 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await RecargarDatosCompletos();
+    }
+
+    private async Task RecargarDatosCompletos()
+    {
+        
         try
         {
             using var context = DbContextFactory.CreateDbContext();
 
             // Cargamos la partida actual y la información de los equipos
             partidaActual = await context.PartidasActuales
-                .Include(p => p.EquipoA)
-                .ThenInclude(e => e.EquipoJugadores)
-                .ThenInclude(ej => ej.Jugador)
-                .Include(p => p.EquipoB)
-                .ThenInclude(e => e.EquipoJugadores)
-                .ThenInclude(ej => ej.Jugador)
+                .Include(p => p.EquipoA).ThenInclude(e => e.EquipoJugadores).ThenInclude(ej => ej.Jugador)
+                .Include(p => p.EquipoB).ThenInclude(e => e.EquipoJugadores).ThenInclude(ej => ej.Jugador)
                 .FirstOrDefaultAsync(p => p.MesaId == MesaId);
 
 
@@ -120,7 +122,7 @@ else
                 tipoJuegoNombre = ((TipoJuego)partidaActual.TipoJuegoId).ToString();
 
                 await CargarEstadoJuego();
-
+                isLoading = true; 
             }
             else
             {
@@ -139,7 +141,7 @@ else
 
     private async Task EstadoCambiado()
     {
-        await CargarEstadoJuego();
+        await RecargarDatosCompletos();
         StateHasChanged();
     }
 

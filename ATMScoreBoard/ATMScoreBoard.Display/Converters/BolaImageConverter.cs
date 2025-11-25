@@ -7,7 +7,7 @@ namespace ATMScoreBoard.Display.Converters
 {
     public class BolaImageConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is int numeroBola)
             {

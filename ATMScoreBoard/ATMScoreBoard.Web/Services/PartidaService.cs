@@ -6,6 +6,7 @@ using ATMScoreBoard.Web.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
 
 namespace ATMScoreBoard.Web.Services
@@ -217,6 +218,24 @@ namespace ATMScoreBoard.Web.Services
                     }
 
                     await context.SaveChangesAsync();
+                    break;
+
+                case "IntercambiarBandas":
+                    if (string.IsNullOrEmpty(partidaActual.BandaEquipoA) || partidaActual.BandaEquipoA == "Blanca")
+                    {
+                        partidaActual.BandaEquipoA = "Roja";
+                    }
+                    else
+                    {
+                        partidaActual.BandaEquipoA = "Blanca";
+                    }
+
+                    // Guardamos el cambio en la BD
+                    context.PartidasActuales.Update(partidaActual);
+                    await context.SaveChangesAsync();
+
+                    // Notificamos a todos (Tablet y WPF recibirán el nuevo BandaEquipoA en el DTO)
+                    await NotificarCambioDeEstado(dto.MesaId);
                     break;
                 default:
                     throw new Exception("Tipo de acción no reconocido.");

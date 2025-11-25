@@ -20,6 +20,16 @@ namespace ATMScoreBoard.Display.Views
     /// </summary>
     public partial class StatBox : UserControl
     {
+
+        public bool IsSwapped
+        {
+            get { return (bool)GetValue(IsSwappedProperty); }
+            set { SetValue(IsSwappedProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsSwappedProperty =
+            DependencyProperty.Register("IsSwapped", typeof(bool), typeof(StatBox), new PropertyMetadata(false));
+
         public StatBox()
         {
             InitializeComponent();

@@ -11,6 +11,31 @@
         Background="#1E1E1E" Foreground="White"
         WindowState="Maximized" WindowStyle="None" FontFamily="./Fonts/#Poppins">
 
+    <Window.Resources>
+        <!-- ... convertidores ... -->
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+        
+        <!-- Estilo para mover Equipo A (Col 0 -> Col 2) -->
+        <Style x:Key="TeamPanelAStyle" TargetType="views:TeamPanel">
+            <Setter Property="Grid.Column" Value="0"/>
+            <Style.Triggers>
+                <DataTrigger  Binding="{Binding DataContext.LadosIntercambiados, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                    <Setter Property="Grid.Column" Value="2"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Estilo para mover Equipo B (Col 2 -> Col 0) -->
+        <Style x:Key="TeamPanelBStyle" TargetType="views:TeamPanel">
+            <Setter Property="Grid.Column" Value="2"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.LadosIntercambiados, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                    <Setter Property="Grid.Column" Value="0"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
 
     <Grid>
         <Grid.Background>
@@ -20,11 +45,7 @@
                         Opacity="0.05"/>
         </Grid.Background>
         
-        <Grid.Resources>
-            <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
-            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
-        </Grid.Resources>
-
+        
         <!-- ============================================= -->
         <!--             VISTA DEL MARCADOR                -->
         <!-- ============================================= -->
@@ -37,10 +58,10 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Panel Equipo A -->
-                <views:TeamPanel Grid.Column="0" DataContext="{Binding EquipoA}">
-                    <views:TeamPanel.BorderColor>
-                        <SolidColorBrush Color="Cyan" />
-                    </views:TeamPanel.BorderColor>
+
+                <views:TeamPanel Style="{StaticResource TeamPanelAStyle}" 
+                                 DataContext="{Binding EquipoA}"
+                                 BorderColor="{Binding DataContext.BordeEquipoA, RelativeSource={RelativeSource AncestorType=Window}}">
                 </views:TeamPanel>
 
                 <!-- Panel Central de Estadísticas -->
@@ -51,17 +72,32 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <views:StatBox Grid.Row="0" Margin="0,15,0,15" Title="Ranking" ValueA="{Binding RankPosicionA}" ValueB="{Binding RankPosicionB}"/>
-                    <views:StatBox Grid.Row="1" Margin="0,15"      Title="Puntuación"  ValueA="{Binding RankPuntosA}" ValueB="{Binding RankPuntosB}"/>
-                    <views:StatBox Grid.Row="2" Margin="0,15"      Title="Partidas Ganadas"  ValueA="{Binding VictoriasGlobalesA}" ValueB="{Binding VictoriasGlobalesB}"/>
-                    <views:StatBox Grid.Row="3" Margin="0,15,0,15" Title="Enfrentamientos"   ValueA="{Binding VictoriasH2HA}" ValueB="{Binding VictoriasH2HB}"/>
+                    <views:StatBox Grid.Row="0" 
+                                   Margin="0,25,0,15" 
+                                   Title="Ranking" 
+                                   IsSwapped="{Binding LadosIntercambiados}"
+                                   ValueA="{Binding RankPosicionA}" ValueB="{Binding RankPosicionB}"/>
+                    <views:StatBox Grid.Row="1" 
+                                   Margin="0,25"      
+                                   Title="Puntuación"  
+                                   IsSwapped="{Binding LadosIntercambiados}"
+                                   ValueA="{Binding RankPuntosA}" ValueB="{Binding RankPuntosB}"/>
+                    <views:StatBox Grid.Row="2" 
+                                   Margin="0,25"      
+                                   Title="Partidas Ganadas"  
+                                   IsSwapped="{Binding LadosIntercambiados}"
+                                   ValueA="{Binding VictoriasGlobalesA}" ValueB="{Binding VictoriasGlobalesB}"/>
+                    <views:StatBox Grid.Row="3" 
+                                   Margin="0,25,0,25" 
+                                   Title="Enfrentamientos"   
+                                   IsSwapped="{Binding LadosIntercambiados}"
+                                   ValueA="{Binding VictoriasH2HA}" ValueB="{Binding VictoriasH2HB}"/>
                 </Grid>
 
                 <!-- Panel Equipo B -->
-                <views:TeamPanel Grid.Column="2" DataContext="{Binding EquipoB}">
-                    <views:TeamPanel.BorderColor>
-                        <SolidColorBrush Color="Cyan" />
-                    </views:TeamPanel.BorderColor>
+                <views:TeamPanel Style="{StaticResource TeamPanelBStyle}" 
+                                 DataContext="{Binding EquipoB}"
+                                 BorderColor="{Binding DataContext.BordeEquipoB, RelativeSource={RelativeSource AncestorType=Window}}">
                 </views:TeamPanel>
             </Grid>
         </Border>

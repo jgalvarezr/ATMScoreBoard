@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Media;
 
 namespace ATMScoreBoard.Display.ViewModels
 {
@@ -43,14 +44,15 @@ namespace ATMScoreBoard.Display.ViewModels
         public ObservableCollection<EstadisticaEquipoColRanking> RankingEquipos { get; } = new();
         public ObservableCollection<EstadisticaJugadorRanking> RankingJugadores { get; } = new();
 
-        [ObservableProperty]
-        private int _partidasParaRanking = 10;
+        [ObservableProperty] private int _partidasParaRanking = 10;
+        [ObservableProperty] private int _diasParaRanking = 10;
 
-        [ObservableProperty]
-        private int _diasParaRanking = 10;
+        [ObservableProperty] private bool _mostrandoRankingEquipos = true;
 
-        [ObservableProperty]
-        private bool _mostrandoRankingEquipos = true;
+        [ObservableProperty] private SolidColorBrush _bordeEquipoA = new(Colors.Transparent);
+        [ObservableProperty] private SolidColorBrush _bordeEquipoB = new(Colors.Transparent);
+
+        [ObservableProperty] private bool _ladosIntercambiados;
 
         public MainWindowViewModel(ApiClient apiClient)
         {
@@ -138,7 +140,21 @@ namespace ATMScoreBoard.Display.ViewModels
                 VictoriasH2HA = estadoPartida.EquipoA.VictoriasH2H;
                 VictoriasH2HB = estadoPartida.EquipoB.VictoriasH2H;
 
+                bool equipoA_EsRojo = string.IsNullOrEmpty(estadoPartida.BandaEquipoA) || estadoPartida.BandaEquipoA == "Roja";
+                LadosIntercambiados = !equipoA_EsRojo;
 
+                // Determinar Colores según el Tipo de Juego
+                if (estadoPartida.TipoJuegoId == 4) // 4 = Chapolín
+                {                    
+                    BordeEquipoA = equipoA_EsRojo ? new SolidColorBrush(Colors.Red) : new SolidColorBrush(Colors.White);
+                    BordeEquipoB = equipoA_EsRojo ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Red);
+                }
+                else
+                {
+                    // Si NO es Chapolín, usamos Transparente (o Cyan, o lo que prefieras)
+                    BordeEquipoA = new SolidColorBrush(Colors.Transparent);
+                    BordeEquipoB = new SolidColorBrush(Colors.Transparent);
+                }
 
                 if (estadoPartida.Ganador != Shared.DTOs.EquipoIdentifier.Ninguno)
                 {

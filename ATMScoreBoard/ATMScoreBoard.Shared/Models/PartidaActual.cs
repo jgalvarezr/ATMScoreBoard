@@ -26,5 +26,6 @@ namespace ATMScoreBoard.Shared.Models
 
         [ForeignKey("EquipoBId")]
         public virtual Equipo? EquipoB { get; set; }
+
     }
 }
