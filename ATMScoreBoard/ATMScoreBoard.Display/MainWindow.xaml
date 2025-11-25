@@ -163,22 +163,18 @@
                     <StackPanel>
 
                         <!-- Primer TextBlock (primera línea) -->
-                        <TextBlock TextWrapping="Wrap" FontSize="18" Foreground="Gray" TextAlignment="Center">            
+                        <TextBlock TextWrapping="Wrap" FontSize="16" Foreground="Gray" TextAlignment="Center">            
                             <Run FontWeight="Bold">¿Cómo se calcula el ranking?</Run>
                             La clasificación se determina por los puntos acumulados en el rendimiento reciente. Para el cálculo, se consideran los resultados de las últimas
                             <Run Text="{Binding PartidasParaRanking}" FontWeight="SemiBold" Foreground="White"/>
                             partidas, siempre que se hayan jugado en los últimos 
                             <Run Text="{Binding DiasParaRanking}" FontWeight="SemiBold" Foreground="White"/>
-                            días.
+                            días.           
+                            <Run FontWeight="Bold"> Puntuación:</Run> 1 punto por victoria normal, 2 puntos por victoria impecable ("zapatero").
                         </TextBlock>
 
-                        <!-- Segundo TextBlock (segunda línea) -->
-                        <TextBlock TextWrapping="Wrap" FontSize="18" Foreground="Gray" TextAlignment="Center" Margin="0,0,0,0">             
-                            <Run FontWeight="Bold">Puntuación:</Run> 1 punto por victoria normal, 2 puntos por victoria impecable ("zapatero").
-                        </TextBlock>
-
-                        <TextBlock TextWrapping="Wrap" FontSize="20" Foreground="Gray" TextAlignment="Center" Margin="0,0,0,0">             
-                            <Run FontWeight="Bold">Disclamer:</Run> Este software es susceptible a mejoras. Si Ud. quiere expresar alguna opinión o sugerencia, sírvase a enviarnos una email a la dirección <Run FontWeight="Bold">mamame@elguevo.com</Run>. Le responderemos cuando me salga de los cojones.
+                        <TextBlock TextWrapping="Wrap" FontSize="16" Foreground="Gray" TextAlignment="Center" Margin="0,0,0,0">             
+                            <Run FontWeight="Bold">Disclamer:</Run> Este software es susceptible a mejoras. Si desea expresar alguna opinión o sugerencia, sírvase a enviarnos una email a la dirección <Run FontWeight="Bold">mamame@elguevo.com</Run>. Le responderemos cuando me salga de los cojones.
                         </TextBlock>
                     </StackPanel>
                 </Border>
