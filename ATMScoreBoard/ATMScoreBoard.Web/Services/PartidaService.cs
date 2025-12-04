@@ -490,14 +490,14 @@ namespace ATMScoreBoard.Web.Services
                 Ganador = EquipoIdentifier.Ninguno
             };
 
-            if (puntuacionA >= PUNTOS_PARA_GANAR || (puntuacionA == PUNTOS_EMPATE_65 && puntuacionB == PUNTOS_EMPATE_65 && bolaBlancaEquipoA))
+            if (puntuacionA >= PUNTOS_PARA_GANAR || (puntuacionA == PUNTOS_EMPATE_65 && bolaBlancaEquipoA))
             {
                 resultado.Ganador = EquipoIdentifier.EquipoA;
                 resultado.Estado = puntuacionB == 0 ? EstadoPartida.Zapatero : EstadoPartida.Ganada;
                 return resultado;
             }
 
-            if (puntuacionB >= PUNTOS_PARA_GANAR || (puntuacionA == PUNTOS_EMPATE_65 && puntuacionB == PUNTOS_EMPATE_65 && bolaBlancaEquipoB))
+            if (puntuacionB >= PUNTOS_PARA_GANAR || (puntuacionB == PUNTOS_EMPATE_65 && bolaBlancaEquipoB))
             {
                 resultado.Ganador = EquipoIdentifier.EquipoB;
                 resultado.Estado = puntuacionA == 0 ? EstadoPartida.Zapatero : EstadoPartida.Ganada;
