@@ -1,6 +1,25 @@
-﻿.btn-bola{
-    
+﻿.btn-bola {
+    transition: all 0.1s ease-out; /* Suaviza el retorno al estado normal */
 }
+
+    .btn-bola:active {
+        /* 1. Cambio de color de fondo a uno brillante (ej. un casi blanco o dorado) */
+        background-color: #f8f9fa !important;
+        border-color: #f8f9fa !important;
+        /* 2. Efecto de hundimiento (se hace un 5% más pequeño) */
+        transform: scale(0.95);
+        /* 3. Un resplandor exterior para que destaque */
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        /* 4. Quitamos la transición al presionar para que el efecto sea instantáneo */
+        transition: none;
+    }
+
+        /* Opcional: Ajustar la imagen interna si es necesario */
+        .btn-bola:active img {
+            /* A veces queda bien aumentar un poco el brillo de la imagen también */
+            filter: brightness(1.2);
+        }
+
 
 .bola-atenuada{
     filter: opacity(0.2);

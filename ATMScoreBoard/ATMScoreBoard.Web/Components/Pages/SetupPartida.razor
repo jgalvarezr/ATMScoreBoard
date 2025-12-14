@@ -266,13 +266,13 @@ else
                     title = "¡Éxito!",
                     text = "La partida ha sido iniciada correctamente.",
                     icon = "success",
-                    timer = 2000,
+                    timer = 1000,
                     showConfirmButton = false
                 });
 
                 // Redirigimos a la página del juego (que crearemos en el futuro)
                 // Usamos un pequeño delay para que el usuario vea la notificación
-                await Task.Delay(2000);
+                //await Task.Delay(500);
                 Navigation.NavigateTo($"/juego/{partidaCreada.MesaId}");
             
         }

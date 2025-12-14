@@ -27,6 +27,10 @@
                             <!-- Nombre -->
                             <ColumnDefinition Width="1*"/>
                             <!-- Puntos -->
+                            <ColumnDefinition Width="1*"/>
+                            <!-- Partidos -->
+                            <ColumnDefinition Width="1*"/>
+                            <!-- Average -->
                         </Grid.ColumnDefinitions>
 
                         <!-- Columna 1: Posición -->
@@ -34,14 +38,20 @@
                             <TextBlock Text="{Binding PosicionRanking}" FontWeight="SemiBold"  FontSize="40" Foreground="DarkCyan" Margin="0,0,20,0"/>
                         </Viewbox>
 
-                        <!-- Columna 2: Jugador A -->
                         <Viewbox Grid.Column="1" HorizontalAlignment="Left">
                             <TextBlock Text="{Binding Nombre}"  Foreground="LightGreen" FontSize="40" Margin="20,0"/>
                         </Viewbox>
 
-                        <!-- Columna 3: Jugador B -->
                         <Viewbox Grid.Column="2">
                             <TextBlock Text="{Binding PuntosRanking}" FontWeight="SemiBold" Foreground="Cyan" HorizontalAlignment="Right"/>
+                        </Viewbox>
+
+                        <Viewbox Grid.Column="3">
+                            <TextBlock Text="{Binding Average, StringFormat={}{0:#.000}}" FontWeight="Normal" Foreground="Cyan" HorizontalAlignment="Right"/>
+                        </Viewbox>
+                        
+                        <Viewbox Grid.Column="4">
+                            <TextBlock Text="{Binding TotalPartidas}" FontWeight="Normal" FontSize="28" Foreground="CadetBlue" HorizontalAlignment="Right"/>
                         </Viewbox>
                     </Grid>
                 </DataTemplate>

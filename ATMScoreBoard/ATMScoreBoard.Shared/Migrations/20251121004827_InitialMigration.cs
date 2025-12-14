@@ -256,6 +256,10 @@ namespace ATMScoreBoard.Shared.Migrations
                     ";
 
             migrationBuilder.Sql(sql);
+
+
+
+
         }
 
         /// <inheritdoc />

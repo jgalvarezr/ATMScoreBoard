@@ -11,6 +11,8 @@ namespace ATMScoreBoard.Shared.DTOs
         public int Id { get; set; } // Corresponde al Id del Jugador
         public string Nombre { get; set; } = string.Empty;
         public int PuntosRanking { get; set; }
-        public long PosicionRanking { get; set; }
+        public int PosicionRanking { get; set; }
+        public int TotalPartidas { get; set; }
+        public double Average { get; set; }
     }
 }
