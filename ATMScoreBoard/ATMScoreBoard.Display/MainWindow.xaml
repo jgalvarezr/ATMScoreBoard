@@ -73,22 +73,22 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <views:StatBox Grid.Row="0" 
-                                   Margin="0,25,0,15" 
+                                   Margin="0,20,0,0" 
                                    Title="Ranking" 
                                    IsSwapped="{Binding LadosIntercambiados}"
                                    ValueA="{Binding RankPosicionA}" ValueB="{Binding RankPosicionB}"/>
                     <views:StatBox Grid.Row="1" 
-                                   Margin="0,25"      
+                                   Margin="0,10,0,5"      
                                    Title="Puntuación"  
                                    IsSwapped="{Binding LadosIntercambiados}"
                                    ValueA="{Binding RankPuntosA}" ValueB="{Binding RankPuntosB}"/>
                     <views:StatBox Grid.Row="2" 
-                                   Margin="0,25"      
+                                   Margin="0,10,0,5"      
                                    Title="Partidas Ganadas"  
                                    IsSwapped="{Binding LadosIntercambiados}"
                                    ValueA="{Binding VictoriasGlobalesA}" ValueB="{Binding VictoriasGlobalesB}"/>
                     <views:StatBox Grid.Row="3" 
-                                   Margin="0,25,0,25" 
+                                   Margin="0,10,0,5" 
                                    Title="Enfrentamientos"   
                                    IsSwapped="{Binding LadosIntercambiados}"
                                    ValueA="{Binding VictoriasH2HA}" ValueB="{Binding VictoriasH2HB}"/>
@@ -105,7 +105,7 @@
         <!-- ============================================= -->
         <!--            VISTA INACTIVA (RANKING)           -->
         <!-- ============================================= -->
-        <Border Visibility="{Binding HayPartidaEnCurso, Converter={StaticResource InverseBoolToVis}}" Padding="50">
+        <Border Visibility="{Binding HayPartidaEnCurso, Converter={StaticResource InverseBoolToVis}}" Padding="0">
             <Grid>
                 <Grid.Resources>
                     <!-- Plantillas con clave (x:Key) para evitar problemas de resolución de namespace -->
@@ -163,7 +163,7 @@
                     <StackPanel>
 
                         <!-- Primer TextBlock (primera línea) -->
-                        <TextBlock TextWrapping="Wrap" FontSize="16" Foreground="Gray" TextAlignment="Center">            
+                        <TextBlock TextWrapping="Wrap"  Foreground="Gray" TextAlignment="Center">            
                             <Run FontWeight="Bold">¿Cómo se calcula el ranking?</Run>
                             La clasificación se determina por los puntos acumulados en el rendimiento reciente. Para el cálculo, se consideran los resultados de las últimas
                             <Run Text="{Binding PartidasParaRanking}" FontWeight="SemiBold" Foreground="White"/>
@@ -173,7 +173,7 @@
                             <Run FontWeight="Bold"> Puntuación:</Run> 1 punto por victoria normal, 2 puntos por victoria impecable ("zapatero").
                         </TextBlock>
 
-                        <TextBlock TextWrapping="Wrap" FontSize="16" Foreground="Gray" TextAlignment="Center" Margin="0,0,0,0">             
+                        <TextBlock TextWrapping="Wrap"  Foreground="Gray" TextAlignment="Center" Margin="0,0,0,0">             
                             <Run FontWeight="Bold">Disclamer:</Run> Este software es susceptible a mejoras. Si desea expresar alguna opinión o sugerencia, sírvase a enviarnos una email a la dirección <Run FontWeight="Bold">mamame@elguevo.com</Run>. Le responderemos cuando me salga de los cojones.
                         </TextBlock>
                     </StackPanel>

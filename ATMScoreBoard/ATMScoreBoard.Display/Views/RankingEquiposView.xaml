@@ -33,7 +33,7 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <!-- Cada fila es un Grid con 4 columnas proporcionales -->
-                    <Grid Margin="0,10">
+                    <Grid Margin="0">
                         <Grid.ColumnDefinitions>
                             <!-- Posición -->
                             <ColumnDefinition Width="1*" />

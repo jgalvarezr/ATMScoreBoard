@@ -23,7 +23,7 @@
                 BorderBrush="{Binding BorderColor, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue=Gray}" 
                 BorderThickness="0" 
                 CornerRadius="3" 
-                Background="#1E1E1E">
+                Background="Transparent">
 
             <Border.Style>
                 <Style TargetType="Border">
@@ -48,7 +48,8 @@
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <ColorAnimation Storyboard.TargetProperty="Background.Color" 
-                                                        To="#1E1E1E" 
+                                                        From="DarkMagenta" 
+                                                        To="Transparent" 
                                                         Duration="0:0:0.1"/>
                                     </Storyboard>
                                 </BeginStoryboard>
@@ -67,14 +68,14 @@
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="3*"/>
-                    <RowDefinition Height="6*"/>
-                    <RowDefinition Height="3*"/>
+                    <RowDefinition Height="4*"/>
+                    <RowDefinition Height="3.5*"/>
                 </Grid.RowDefinitions>
 
                 <!-- LISTA DE JUGADORES -->
                 <Border x:Name="PlayersBorder" Grid.Row="0"
                         BorderBrush="{Binding BorderColor, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue=Gray}"                         
-                        BorderThickness="5" CornerRadius="35" Margin="0" Padding="15 0 15 0 ">
+                        BorderThickness="5" CornerRadius="10" Margin="0" Padding="5 0 5 0 ">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -87,7 +88,7 @@
                                Nombre="{Binding Nombre}" 
                                PosicionRanking="{Binding PosicionRanking}" 
                                PuntosRanking="{Binding PuntosRanking}" 
-                               Margin="0,15 0 5" />
+                               Margin="0 4 0 2" />
 
                         <views:PlayerPanel  Grid.Row="1"
                             Visibility="{Binding IsPareja, Converter={StaticResource BoolToVis}}"
@@ -95,7 +96,7 @@
                                Nombre="{Binding Nombre}" 
                                PosicionRanking="{Binding PosicionRanking}" 
                                PuntosRanking="{Binding PuntosRanking}" 
-                               Margin="0 5 0 15" />
+                               Margin="0 2 0 4" />
                     </Grid>
 
                 </Border>
@@ -105,16 +106,15 @@
                 <Viewbox Grid.Row="1">
                     <TextBlock Text="{Binding Puntuacion}" 
                            FontFamily="DS-Digital" 
-                           FontSize="250" 
                            FontWeight="Bold" 
                            Foreground="DarkOrange" 
-                           HorizontalAlignment="Center" Margin="0,20">
+                           HorizontalAlignment="Center" Margin="0,0">
                         <TextBlock.Effect>
                             <DropShadowEffect 
                             Color="Orange"          
                             ShadowDepth="0"        
                             BlurRadius="4"         
-                            Opacity="0.6"          
+                            Opacity="0.4"          
                             RenderingBias="Quality"/>
                         </TextBlock.Effect>
 
@@ -123,39 +123,38 @@
 
 
                 <!-- BOLAS EMBOLSADAS -->
-                <Grid Grid.Row="2">
-                    <ItemsControl ItemsSource="{Binding BolasEmbolsadas}" 
-                                  HorizontalAlignment="Center" 
-                                  VerticalAlignment="Center">
+                <Grid Grid.Row="2" HorizontalAlignment="Center">
+                    <Viewbox Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <ItemsControl ItemsSource="{Binding BolasEmbolsadas}" Width="450">
 
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
 
-                                <WrapPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
 
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-
-                                <Image Source="{Binding Converter={StaticResource BolaImageConverter}}" 
-                                   Width="100" 
-                                   Height="100" 
-                                   Margin="2">
-                                    <Image.Effect>
-                                        <DropShadowEffect 
+                                    <Image Source="{Binding Converter={StaticResource BolaImageConverter}}" 
+                                   Width="80" 
+                                   Height="80" 
+                                   Margin="0">
+                                        <Image.Effect>
+                                            <DropShadowEffect 
                                         Color="Black"          
                                         ShadowDepth="10"        
                                         BlurRadius="8"         
                                         Opacity="0.7"          
                                         RenderingBias="Quality"/>
-                                    </Image.Effect>
+                                        </Image.Effect>
 
-                                </Image>
+                                    </Image>
 
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Viewbox>
                 </Grid>
             </Grid>
         </Border>
